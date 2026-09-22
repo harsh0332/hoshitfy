@@ -6,9 +6,21 @@ import { Zap, ShieldCheck, RefreshCw, FileCheck2, ArrowRight, Play, Sparkles } f
 import { Button } from "@/components/ui/Button";
 import { PhoneFrame } from "@/components/ui/PhoneFrame";
 import { TimecodeBadge } from "@/components/ui/TimecodeBadge";
+import { VideoLightbox } from "@/components/ui/VideoLightbox";
+import { VideoItem } from "@/components/ui/VideoCard";
 
 export function HeroSection() {
   const [isEditingSimulated, setIsEditingSimulated] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const heroVideoItem: VideoItem = {
+    id: "hero-reel",
+    title: "Host Editify 21-Hour Showreel",
+    category: "Showreel",
+    duration: "00:35",
+    fullVideoUrl: "/videos/hero-showreel-full.mp4",
+    posterUrl: "/posters/hero-showreel.jpg",
+  };
 
   // Toggle raw vs edited state inside the hero PhoneFrame every 4 seconds to demonstrate transformation
   useEffect(() => {
@@ -76,6 +88,16 @@ export function HeroSection() {
                 <span>Book My Free Content Audit</span>
                 <ArrowRight className="w-5 h-5" />
               </Button>
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-sm sm:text-base border border-white/15 flex items-center justify-center gap-3 transition-all cursor-pointer group hover:border-[#FF3D8B]/50"
+              >
+                <div className="w-8 h-8 rounded-full bg-brand-gradient flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform">
+                  <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                </div>
+                <span>Watch Reel (35s)</span>
+              </button>
             </div>
 
             {/* Micro-copy under CTA */}
@@ -121,52 +143,63 @@ export function HeroSection() {
                   </div>
 
                   {/* Visual Transformation Simulator */}
-                  <div className="relative flex-1 my-3 rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10">
-                    {/* Background Visual */}
-                    <div className="absolute inset-0">
-                      <Image
-                        src="/generated/glass-film-strip.jpg"
-                        alt="Transformation Reel"
-                        fill
-                        className="object-cover opacity-60"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40" />
-                    </div>
+                  <div 
+                    onClick={() => setIsLightboxOpen(true)}
+                    className="relative flex-1 my-3 rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10 cursor-pointer group"
+                  >
+                    {/* Real Looping Video */}
+                    <video
+                      src="/videos/hero-showreel-full.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      poster="/posters/hero-showreel.jpg"
+                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
+                        isEditingSimulated ? "grayscale-0 contrast-105" : "grayscale contrast-75 brightness-75"
+                      }`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 
                     {/* Mode Overlay Indicator */}
-                    <div className="relative z-10 text-center px-4">
+                    <div className="relative z-10 text-center px-4 pointer-events-none">
                       {isEditingSimulated ? (
                         <div className="flex flex-col items-center animate-in zoom-in-95 duration-300">
-                          <div className="px-3 py-1 rounded-full bg-brand-gradient text-white text-[11px] font-bold tracking-wider uppercase mb-3 flex items-center gap-1.5 shadow-lg">
+                          <div className="px-3 py-1 rounded-full bg-brand-gradient text-white text-[11px] font-bold tracking-wider uppercase mb-2 flex items-center gap-1.5 shadow-lg">
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>HOST EDITIFY GRADE</span>
                           </div>
-                          {/* Animated Captions mockup */}
-                          <div className="bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-purple-500/50 mb-2">
-                            <p className="text-white text-xs font-extrabold uppercase tracking-wide">
-                              &ldquo;3 WEEKS AGO IN <span className="text-[#FF8A1E]">DUBAI</span>&rdquo;
-                            </p>
-                          </div>
-                          <span className="text-[10px] text-[#1EC8FF] font-mono">
-                            ⚡ Sound Design + Dynamic B-Roll Cut
+                          <span className="text-[10px] text-white/90 font-mono bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
+                            ⚡ 21h Turnaround Delivery
                           </span>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center opacity-85">
-                          <div className="px-3 py-1 rounded-full bg-[#14141C] text-[#A0A0B0] text-[11px] font-mono uppercase mb-3 border border-white/10">
+                          <div className="px-3 py-1 rounded-full bg-[#14141C] text-[#A0A0B0] text-[11px] font-mono uppercase mb-2 border border-white/10">
                             RAW CAMERA FOOTAGE
                           </div>
-                          <p className="text-white/60 text-xs italic">
-                            Uncut footage sitting in camera roll...
-                          </p>
+                          <span className="text-[10px] text-white/70 font-mono bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
+                            Uncut iPhone Clip
+                          </span>
                         </div>
                       )}
                     </div>
 
+                    {/* Click to play full video hint */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-xs z-20">
+                      <div className="w-12 h-12 rounded-full bg-brand-gradient text-white flex items-center justify-center shadow-xl">
+                        <Play className="w-5 h-5 fill-white ml-0.5" />
+                      </div>
+                    </div>
+
                     {/* State switch toggle button */}
                     <button
-                      onClick={() => setIsEditingSimulated(!isEditingSimulated)}
-                      className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-[10px] text-white font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditingSimulated(!isEditingSimulated);
+                      }}
+                      className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full bg-black/70 hover:bg-black/90 backdrop-blur-md text-[10px] text-white font-medium flex items-center gap-1.5 transition-colors cursor-pointer border border-white/20"
                     >
                       <Play className="w-3 h-3 fill-white" />
                       <span>{isEditingSimulated ? "View Raw State" : "Snap to Finished Edit"}</span>
@@ -175,7 +208,7 @@ export function HeroSection() {
 
                   {/* Phone Bottom Meta */}
                   <div className="flex items-center justify-between text-[11px] text-[#A0A0B0] z-20 pb-2">
-                    <span className="font-semibold text-white">Reel #04 / Real Estate</span>
+                    <span className="font-semibold text-white">Reel #04 / Dubai</span>
                     <span className="text-[#FF8A1E] font-mono">21h Turnaround</span>
                   </div>
                 </div>
@@ -184,6 +217,13 @@ export function HeroSection() {
           </div>
         </div>
       </div>
+
+      {/* Hero Showreel Lightbox */}
+      <VideoLightbox
+        video={isLightboxOpen ? heroVideoItem : null}
+        onClose={() => setIsLightboxOpen(false)}
+        onBookClick={scrollToBooking}
+      />
     </section>
   );
 }

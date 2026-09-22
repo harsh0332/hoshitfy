@@ -1,10 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import { Play, Sparkles } from "lucide-react";
 import { site } from "@/lib/site.config";
+import { VideoLightbox } from "@/components/ui/VideoLightbox";
+import { VideoItem } from "@/components/ui/VideoCard";
 
 export function FounderSection() {
+  const [isPlayingFounderVideo, setIsPlayingFounderVideo] = useState(false);
+
+  const founderVideo: VideoItem = {
+    id: "founder-video",
+    title: "A Message from Dhanraj, Founder of Host Editify",
+    category: "Personal Brand",
+    duration: "00:34",
+    fullVideoUrl: "/videos/founder-story-full.mp4",
+    posterUrl: "/posters/founder-story.jpg",
+  };
+
   return (
     <section className="relative py-20 md:py-28 bg-[#0A0A0F] overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -13,16 +27,35 @@ export function FounderSection() {
           <div className="absolute top-0 right-0 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
-            {/* Left: Founder Portrait Frame with Gradient Ring */}
+            {/* Left: Founder Video Card */}
             <div className="md:col-span-5 flex flex-col items-center text-center">
-              <div className="relative w-44 h-44 sm:w-52 sm:h-52 rounded-full p-1.5 bg-brand-gradient shadow-[0_0_35px_rgba(162,75,255,0.4)] mb-4">
-                <div className="relative w-full h-full rounded-full overflow-hidden bg-[#0A0A0F] border-2 border-black">
-                  <Image
-                    src="/brand/logo.png"
-                    alt={site.founder.name}
-                    fill
-                    className="object-contain p-4"
-                  />
+              <div 
+                onClick={() => setIsPlayingFounderVideo(true)}
+                className="relative w-48 sm:w-56 aspect-[9/16] rounded-2xl overflow-hidden border-2 border-white/20 shadow-[0_0_35px_rgba(162,75,255,0.3)] mb-4 cursor-pointer group select-none"
+              >
+                {/* Looping preview */}
+                <video
+                  src="/videos/founder-story-preview.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  poster="/posters/founder-story.jpg"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-brand-gradient text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                    <Play className="w-5 h-5 fill-white ml-0.5" />
+                  </div>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 text-left">
+                  <span className="px-2 py-0.5 rounded bg-black/75 border border-white/15 text-[10px] font-mono text-white/90">
+                    Watch Founder Note (34s)
+                  </span>
                 </div>
               </div>
 
@@ -71,6 +104,12 @@ export function FounderSection() {
           </div>
         </div>
       </div>
+
+      {/* Founder Video Lightbox */}
+      <VideoLightbox
+        video={isPlayingFounderVideo ? founderVideo : null}
+        onClose={() => setIsPlayingFounderVideo(false)}
+      />
     </section>
   );
 }

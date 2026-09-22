@@ -99,13 +99,25 @@ export function BeforeAfterSlider({ pairs, className }: BeforeAfterSliderProps) 
       >
         {/* RIGHT LAYER: Edited Version (Full Background) */}
         <div className="absolute inset-0">
-          <Image
-            src={activePair.editPoster}
-            alt="Host Editify Edited Version"
-            fill
-            sizes="380px"
-            className="object-cover"
-          />
+          {activePair.editVideo ? (
+            <video
+              src={activePair.editVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              poster={activePair.editPoster}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Image
+              src={activePair.editPoster}
+              alt="Host Editify Edited Version"
+              fill
+              sizes="380px"
+              className="object-cover"
+            />
+          )}
           {/* Graded badge */}
           <div className="absolute bottom-5 right-4 z-10 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-[#A24BFF]/50 text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-md">
             <Sparkles className="w-3.5 h-3.5 text-[#FF8A1E]" />
@@ -119,13 +131,25 @@ export function BeforeAfterSlider({ pairs, className }: BeforeAfterSliderProps) 
           style={{ width: `${sliderPosition}%` }}
         >
           <div className="relative w-full h-full" style={{ width: containerRef.current?.clientWidth || "100%" }}>
-            <Image
-              src={activePair.rawPoster}
-              alt="Raw Unedited Footage"
-              fill
-              sizes="380px"
-              className="object-cover filter grayscale contrast-75 brightness-75"
-            />
+            {activePair.rawVideo || activePair.editVideo ? (
+              <video
+                src={activePair.rawVideo || activePair.editVideo}
+                autoPlay
+                loop
+                muted
+                playsInline
+                poster={activePair.rawPoster}
+                className="w-full h-full object-cover filter grayscale contrast-75 brightness-75"
+              />
+            ) : (
+              <Image
+                src={activePair.rawPoster}
+                alt="Raw Unedited Footage"
+                fill
+                sizes="380px"
+                className="object-cover filter grayscale contrast-75 brightness-75"
+              />
+            )}
             {/* Raw badge */}
             <div className="absolute bottom-5 left-4 z-10 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-[#A0A0B0] text-[11px] font-semibold flex items-center gap-1.5 shadow-md">
               <Video className="w-3.5 h-3.5" />
