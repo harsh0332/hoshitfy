@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@import "../../public/fonts/fontshare.css";
+
+@layer base {
+  :root {
+    --bg: #0A0A0F;
+    --surface: #14141C;
+    --surface-hover: #1D1D28;
+    --text: #FFFFFF;
+    --muted: #A0A0B0;
+    --dim: #666678;
+    --cyan: #1EC8FF;
+    --blue: #3B6BFF;
+    --purple: #A24BFF;
+    --pink: #FF3D8B;
+    --orange: #FF8A1E;
+    --brand-gradient: linear-gradient(90deg, #3B6BFF 0%, #A24BFF 35%, #FF3D8B 70%, #FF8A1E 100%);
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body, system-ui, -apple-system, sans-serif);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Filmic Grain Overlay */
+.film-grain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.035;
+  background-image: url('/generated/grain.svg');
+}
+
+/* Gradient Text Utilities */
+.text-brand-gradient {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+.bg-brand-gradient {
+  background: var(--brand-gradient);
+}
+
+.border-brand-gradient {
+  border-image: var(--brand-gradient) 1;
+}
+
+/* Glow effects */
+.glow-purple {
+  box-shadow: 0 0 50px -10px rgba(162, 75, 255, 0.35);
+}
+
+.glow-btn {
+  box-shadow: 0 0 25px -4px rgba(255, 61, 139, 0.45);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 30px -6px rgba(30, 200, 255, 0.4);
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+    transform: none;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
