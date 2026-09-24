@@ -7,16 +7,6 @@ declare global {
   }
 }
 
-export type CtaPosition =
-  | "top-bar"
-  | "nav"
-  | "hero"
-  | "how-it-works"
-  | "proof"
-  | "final"
-  | "sticky-mobile"
-  | "sample-edit";
-
 export interface UtmData {
   utm_source?: string;
   utm_medium?: string;

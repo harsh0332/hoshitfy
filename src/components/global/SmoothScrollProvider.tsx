@@ -29,6 +29,8 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
+      // In-page links (#work-section etc.) scroll smoothly and stop below the sticky header
+      anchors: { offset: -80 },
     });
     lenisRef.current = lenis;
 

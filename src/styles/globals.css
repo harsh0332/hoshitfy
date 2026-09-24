@@ -1,97 +1,189 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --font-heading: 'Montserrat', system-ui, -apple-system, sans-serif;
-    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-    --bg: #0A0A0F;
-    --surface: #14141C;
-    --surface-hover: #1D1D28;
-    --text: #FFFFFF;
-    --muted: #A0A0B0;
-    --dim: #666678;
-    --purple: #A24BFF;
-    --brand-gradient: linear-gradient(135deg, #7928CA 0%, #A24BFF 50%, #FF0080 100%);
-  }
+/* Design tokens. Fonts come from next/font (see src/app/layout.tsx). */
+@theme {
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-montserrat), system-ui, -apple-system, sans-serif;
 
+  --color-bg: #0A0A0F;
+  --color-surface: #14141C;
+  --color-muted: #A0A0B0;
+  --color-accent: #A24BFF;
+}
+
+:root {
+  --brand-gradient: linear-gradient(90deg, #3B6BFF 0%, #A24BFF 38%, #FF3D8B 72%, #FF8A1E 100%);
+  /* Cards always contrast with the section they sit on (see .section-alt) */
+  --card-bg: #14141C;
+  /* Height of the mobile sticky CTA bar; the page reserves this space at the bottom */
+  --sticky-bar-h: 76px;
+}
+
+@layer base {
   body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+    background-color: var(--color-bg);
+    color: #fff;
+    font-family: var(--font-sans);
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: var(--font-heading), system-ui, -apple-system, sans-serif;
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
     text-wrap: balance;
+    letter-spacing: -0.01em;
   }
 
-  p, li, blockquote {
+  p, li, blockquote, span {
     text-wrap: pretty;
   }
 }
 
-/* Filmic Grain Overlay */
+@layer components {
+  /* ---------- Layout ---------- */
+  .container-page {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 20px;
+  }
+  .section {
+    padding-block: 80px;
+    background-color: var(--color-bg);
+    /* anchor jumps land below the sticky header */
+    scroll-margin-top: 72px;
+  }
+  .section-alt {
+    background-color: var(--color-surface);
+    --card-bg: #0A0A0F;
+  }
+  .section-header {
+    max-width: 720px;
+    margin-inline: auto;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+  .grid-gap {
+    gap: 16px;
+  }
+
+  /* ---------- Type scale ---------- */
+  .type-h1 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1.12;
+  }
+  .type-h2 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 30px;
+    line-height: 1.2;
+  }
+  .type-h3 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.3;
+  }
+  .type-body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .type-small {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .text-muted {
+    color: var(--color-muted);
+  }
+
+  /* ---------- Surfaces ---------- */
+  .card {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 24px;
+  }
+  .icon-tile {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .container-page { padding-inline: 32px; }
+    .section { padding-block: 112px; }
+    .section-header { margin-bottom: 56px; }
+    .grid-gap { gap: 24px; }
+    .type-h1 { font-size: 60px; line-height: 1.08; }
+    .type-h2 { font-size: 44px; line-height: 1.15; }
+    .type-h3 { font-size: 22px; }
+    .type-body { font-size: 18px; }
+    .card { padding: 32px; }
+  }
+}
+
+/* ---------- Brand gradient ---------- */
+.text-brand-gradient {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* keep descenders from being clipped */
+  padding-bottom: 0.06em;
+}
+.bg-brand-gradient {
+  background: var(--brand-gradient);
+}
+
+/* Subtle film grain over the whole page */
 .film-grain {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
   z-index: 999;
   opacity: 0.035;
   background-image: url('/generated/grain.svg');
 }
 
-/* Gradient Text Utilities */
-.text-brand-gradient {
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-block;
+/* Hide native scrollbars on horizontal carousels */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-.bg-brand-gradient {
-  background: var(--brand-gradient);
+/* Mobile: reserve space for the sticky CTA bar so it never covers content */
+@media (max-width: 767px) {
+  body {
+    padding-bottom: var(--sticky-bar-h);
+  }
 }
 
-.border-brand-gradient {
-  border-image: var(--brand-gradient) 1;
-}
-
-/* Glow effects */
-.glow-purple {
-  box-shadow: 0 0 50px -10px rgba(162, 75, 255, 0.35);
-}
-
-.glow-btn {
-  box-shadow: 0 0 25px -4px rgba(162, 75, 255, 0.45);
-}
-
-/* Marquee Animation */
+/* ---------- Marquee (brand tiles on phone) ---------- */
 @keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
-
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 28s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
+  animation: marquee 30s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee {
     animation: none;
-    transform: none;
   }
-  * {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

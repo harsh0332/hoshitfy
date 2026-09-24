@@ -2,7 +2,6 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { site } from "@/lib/site.config";
 
 export const metadata: Metadata = {
   title: "Terms of Service — Host Editify",
@@ -21,14 +20,11 @@ export default function TermsPage() {
           <span>Back to Home</span>
         </Link>
 
-        <div className="inline-block px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20 text-[#FF8A1E] text-xs mb-3 font-semibold">
-          Service Agreement &amp; Guarantees
-        </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
           Terms of Service
         </h1>
         <p className="text-xs text-[#A0A0B0] mb-8 font-medium">
-          Last Updated: September 2026 · Marked for Founder Review
+          Last Updated: September 2026
         </p>
 
         <div className="space-y-6 text-sm sm:text-base text-[#A0A0B0] leading-relaxed border-t border-white/10 pt-6">

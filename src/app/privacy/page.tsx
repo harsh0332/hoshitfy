@@ -21,14 +21,11 @@ export default function PrivacyPage() {
           <span>Back to Home</span>
         </Link>
 
-        <div className="inline-block px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[#1EC8FF] text-xs mb-3 font-semibold">
-          Meta Ads &amp; Privacy Notice
-        </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
           Privacy Policy
         </h1>
         <p className="text-xs text-[#A0A0B0] mb-8 font-medium">
-          Last Updated: September 2026 · Marked for Founder Review
+          Last Updated: September 2026
         </p>
 
         <div className="space-y-6 text-sm sm:text-base text-[#A0A0B0] leading-relaxed border-t border-white/10 pt-6">

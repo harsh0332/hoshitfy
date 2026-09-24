@@ -1,45 +1,29 @@
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface IconTileProps {
-  icon: LucideIcon;
-  size?: number;
-  strokeWidth?: number;
-  className?: string;
-  color?: "purple" | "white";
-}
-
+/** The one icon tile style: 44x44, radius 12, rgba(255,255,255,0.06). */
 export function IconTile({
   icon: Icon,
-  size = 22,
-  strokeWidth = 1.75,
-  className = "",
-  color = "purple",
-}: IconTileProps) {
+  size = 24,
+  className,
+}: {
+  icon: LucideIcon;
+  /** 24 for cards, 20 for list rows */
+  size?: 20 | 24;
+  className?: string;
+}) {
   return (
-    <div
-      className={`w-11 h-11 shrink-0 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center transition-all ${className}`}
-    >
-      <Icon
-        size={size}
-        strokeWidth={strokeWidth}
-        className={color === "purple" ? "text-[#A24BFF]" : "text-white/80"}
-      />
+    <div className={cn("icon-tile", className)}>
+      <Icon size={size} strokeWidth={1.75} className="text-[#A24BFF]" aria-hidden />
     </div>
   );
 }
 
-export function NumberTile({
-  number,
-  className = "",
-}: {
-  number: string;
-  className?: string;
-}) {
+/** Same tile, showing a step number instead of an icon. */
+export function NumberTile({ number, className }: { number: string; className?: string }) {
   return (
-    <div
-      className={`w-11 h-11 shrink-0 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center font-heading font-bold text-sm text-[#A24BFF] transition-all ${className}`}
-    >
+    <div className={cn("icon-tile font-heading text-base font-bold text-[#A24BFF]", className)}>
       {number}
     </div>
   );

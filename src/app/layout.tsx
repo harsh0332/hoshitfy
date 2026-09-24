@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Inter, Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "@/styles/globals.css";
@@ -13,10 +14,24 @@ import { StickyMobileCta } from "@/components/global/StickyMobileCta";
 import { AuditModalProvider } from "@/context/AuditModalContext";
 import { AuditModalContainer } from "@/components/modals/AuditModalContainer";
 
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Host Editify — Short-Form Video Editing for Founders in India & Dubai",
+  title: "Host Editify — Short-Form Video Editing for Founders in India and Dubai",
   description:
-    "You film it. We edit it. Ready in 24 hours. Dedicated short-form video editing for founders, coaches and brands in India and Dubai.",
+    "You film it. We edit it. It's ready in 24 hours. A dedicated short-form video editing team for founders, coaches and brands in India and Dubai.",
   metadataBase: new URL("https://hosteditify.com"),
   keywords: [
     "video editing India",
@@ -27,7 +42,7 @@ export const metadata: Metadata = {
     "YouTube Shorts editor",
     "Host Editify",
   ],
-  authors: [{ name: "Dhanraj Singh" }],
+  authors: [{ name: site.founder.name }],
   creator: "Host Editify",
   openGraph: {
     type: "website",
@@ -36,13 +51,13 @@ export const metadata: Metadata = {
     siteName: "Host Editify",
     title: "Host Editify — Ready in 24 Hours",
     description:
-      "You film it. We edit it. Ready in 24 hours. No CapCut, no chasing freelancers, no hiring an editor.",
+      "You film it. We edit it. It's ready in 24 hours. No CapCut, no chasing freelancers, no hiring an editor.",
     images: [
       {
         url: "/generated/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Host Editify — You film it. We edit it. Ready in 24 hours.",
+        alt: "Host Editify — You film it. We edit it. It's ready in 24 hours.",
       },
     ],
   },
@@ -50,12 +65,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Host Editify — Ready in 24 Hours",
     description:
-      "Dedicated short-form video editing team for founders, coaches and brands in India and Dubai. First video edited free.",
+      "A dedicated short-form video editing team for founders, coaches and brands in India and Dubai. First video edited free.",
     images: ["/generated/og-image.png"],
   },
   icons: {
-    icon: "/brand/logo-transparent.png",
-    apple: "/brand/logo-transparent.png",
+    icon: "/brand/icon.png",
+    apple: "/brand/icon.png",
   },
 };
 
@@ -66,19 +81,18 @@ export default function RootLayout({
 }) {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
-  // Organization Schema
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Host Editify",
     url: "https://hosteditify.com",
-    logo: "https://hosteditify.com/brand/logo-transparent.png",
+    logo: "https://hosteditify.com/brand/icon.png",
     founder: {
       "@type": "Person",
       name: site.founder.name,
     },
     description:
-      "Specialized short-form video editing agency delivering publish-ready Reels, Shorts and videos in 24 hours.",
+      "Short-form video editing team for founders, coaches and brands in India and Dubai. Publish-ready Reels and Shorts in 24 hours.",
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer service",
@@ -87,21 +101,14 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${montserrat.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@700;800&display=swap"
-          rel="stylesheet"
-        />
-        {/* Organization Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
 
-        {/* Meta Pixel Code (Conditional on env) */}
+        {/* Meta Pixel (only when NEXT_PUBLIC_META_PIXEL_ID is set) */}
         {pixelId && (
           <Script id="meta-pixel" strategy="afterInteractive">
             {`
@@ -119,34 +126,22 @@ export default function RootLayout({
           </Script>
         )}
       </head>
-      <body className="bg-[#0A0A0F] text-white min-h-screen selection:bg-[#FF3D8B]/30 selection:text-white relative font-sans">
-        {/* Subtle Filmic Grain Texture Overlay */}
+      <body className="relative min-h-screen bg-[#0A0A0F] font-sans text-white selection:bg-[#A24BFF]/30 selection:text-white">
         <div className="film-grain" />
 
         <SmoothScrollProvider>
           <AuditModalProvider>
-            {/* Top Bar Announcement */}
             <TopBar />
-
-            {/* Sticky Header */}
             <Navbar />
-
-            {/* Main Content */}
             <div className="relative z-10">{children}</div>
-
-            {/* Footer */}
             <FooterSection />
 
-            {/* Floating Actions */}
             <FloatingWhatsApp />
             <StickyMobileCta />
-
-            {/* Global Audit Modal Popup */}
             <AuditModalContainer />
           </AuditModalProvider>
         </SmoothScrollProvider>
 
-        {/* Vercel Web Analytics & Speed Insights */}
         <Analytics />
         <SpeedInsights />
       </body>

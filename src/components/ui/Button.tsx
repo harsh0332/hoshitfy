@@ -1,80 +1,27 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
-import { trackCtaClick, CtaPosition } from "@/lib/tracking";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost";
-  size?: "sm" | "md" | "lg";
-  ctaPosition?: CtaPosition;
-  magnetic?: boolean;
+  /** primary = gradient pill, secondary = ghost pill. Both are 52px tall everywhere. */
+  variant?: "primary" | "secondary";
   children: React.ReactNode;
 }
 
-export function Button({
-  variant = "primary",
-  size = "md",
-  ctaPosition,
-  magnetic = false,
-  className,
-  onClick,
-  children,
-  ...props
-}: ButtonProps) {
-  const buttonRef = useRef<HTMLButtonElement>(null);
+const base =
+  "inline-flex h-[52px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-7 text-[15px] font-semibold text-white transition-[transform,box-shadow,background-color,border-color] duration-200 cursor-pointer select-none disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A24BFF]";
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!magnetic || !buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    buttonRef.current.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
-  };
+const variants = {
+  primary:
+    "bg-brand-gradient shadow-[0_8px_28px_-8px_rgba(162,75,255,0.6)] hover:shadow-[0_10px_34px_-6px_rgba(162,75,255,0.75)] hover:-translate-y-px active:translate-y-0",
+  secondary:
+    "bg-transparent border border-white/20 hover:border-white/45 hover:bg-white/[0.04]",
+};
 
-  const handleMouseLeave = () => {
-    if (!magnetic || !buttonRef.current) return;
-    buttonRef.current.style.transform = "translate(0px, 0px)";
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (ctaPosition) {
-      trackCtaClick(ctaPosition, typeof children === "string" ? children : "CTA");
-    }
-    if (onClick) onClick(e);
-  };
-
-  const sizeClasses = {
-    sm: "h-10 px-4 text-xs font-semibold",
-    md: "h-[46px] sm:h-12 px-6 text-sm font-semibold tracking-wide",
-    lg: "h-[52px] sm:h-[54px] px-8 text-sm sm:text-base font-semibold tracking-wide",
-  };
-
-  const variantClasses = {
-    primary:
-      "relative bg-brand-gradient text-white rounded-full transition-all duration-300 shadow-[0_0_24px_-4px_rgba(162,75,255,0.45)] hover:shadow-[0_0_36px_0_rgba(162,75,255,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-white/20",
-    secondary:
-      "bg-[#14141C] text-white hover:bg-[#1D1D28] rounded-full border border-white/20 hover:border-[#A24BFF]/50 transition-all",
-    outline:
-      "bg-transparent text-white border border-white/20 hover:border-white/50 rounded-full transition-all",
-    ghost: "bg-transparent text-[#A0A0B0] hover:text-white transition-colors",
-  };
-
+export function Button({ variant = "primary", className, children, type = "button", ...props }: ButtonProps) {
   return (
-    <button
-      ref={buttonRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      data-cta-position={ctaPosition}
-      className={cn(
-        "inline-flex items-center justify-center cursor-pointer select-none transition-transform duration-200 ease-out whitespace-nowrap",
-        sizeClasses[size],
-        variantClasses[variant],
-        className
-      )}
-      {...props}
-    >
+    <button type={type} className={cn(base, variants[variant], className)} {...props}>
       {children}
     </button>
   );
