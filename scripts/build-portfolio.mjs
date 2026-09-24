@@ -1,160 +1,98 @@
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
+// Scans public/videos/work/ and writes src/data/portfolio.json.
+//
+//   public/videos/work/short-form/<slug>.mp4      -> "Short-form edits" tab
+//   public/videos/work/ads/<slug>.mp4             -> "Ad videos" tab
+//   public/videos/work/before-after/pair-N/{raw,edit}.mp4 -> Before/After (hidden until pairs exist)
+//
+// Each video lives in exactly one folder, so it appears in exactly one category.
+// A poster (<= 80 KB JPEG) is generated for every video that doesn't have one yet.
+// Compress raw clips first with scripts/encode-video.sh.
+import fs from "fs";
+import path from "path";
+import { execFileSync } from "child_process";
+import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
-
-const publicDir = path.join(rootDir, 'public');
-const workVideosDir = path.join(publicDir, 'videos', 'work');
-const postersDir = path.join(publicDir, 'posters', 'work');
-const dataDir = path.join(rootDir, 'src', 'data');
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const publicDir = path.join(rootDir, "public");
+const workDir = path.join(publicDir, "videos", "work");
+const postersDir = path.join(publicDir, "posters", "work");
+const outPath = path.join(rootDir, "src", "data", "portfolio.json");
+const MAX_POSTER_BYTES = 80 * 1024;
 
 fs.mkdirSync(postersDir, { recursive: true });
-fs.mkdirSync(dataDir, { recursive: true });
 
-function formatTitle(filename) {
-  const base = path.basename(filename, path.extname(filename));
-  return base
-    .split(/[-_]+/)
-    .map(word => {
-      if (word.toLowerCase() === 'ai') return 'AI';
-      if (word.toLowerCase() === 'ugc') return 'UGC';
-      if (word.toLowerCase() === 'vfx') return 'VFX';
-      if (word.toLowerCase() === 'saas') return 'SaaS';
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(' ');
-}
-
-function generatePoster(videoPath, posterPath) {
-  if (fs.existsSync(posterPath) && fs.statSync(posterPath).size > 0) {
-    return true;
-  }
-  try {
-    execSync(`ffmpeg -y -ss 00:00:01 -i "${videoPath}" -vframes 1 -q:v 2 "${posterPath}"`, {
-      stdio: 'ignore',
-    });
-    return true;
-  } catch (err) {
-    // If ffmpeg failed at 1s, try at 0s
+function makePoster(videoPath, posterPath) {
+  if (fs.existsSync(posterPath) && fs.statSync(posterPath).size > 0) return;
+  // Walk quality down until the poster fits the size budget
+  for (const q of [4, 6, 8, 10, 13, 16]) {
     try {
-      execSync(`ffmpeg -y -ss 00:00:00.1 -i "${videoPath}" -vframes 1 -q:v 2 "${posterPath}"`, {
-        stdio: 'ignore',
-      });
-      return true;
+      execFileSync(
+        "ffmpeg",
+        ["-v", "error", "-y", "-ss", "1", "-i", videoPath, "-frames:v", "1",
+          "-vf", "scale='min(540,iw)':-2", "-q:v", String(q), posterPath],
+        { stdio: "ignore" }
+      );
     } catch {
-      return false;
+      return;
     }
+    if (fs.statSync(posterPath).size <= MAX_POSTER_BYTES) return;
   }
 }
 
-// 1. Scan short-form videos
-const shortFormDir = path.join(workVideosDir, 'short-form');
-const shortFormItems = [];
-if (fs.existsSync(shortFormDir)) {
-  const files = fs.readdirSync(shortFormDir).filter(f => f.endsWith('.mp4'));
-  for (const file of files) {
-    const videoFile = path.join(shortFormDir, file);
-    const posterFilename = `${path.basename(file, '.mp4')}.jpg`;
-    const posterFile = path.join(postersDir, posterFilename);
-    
-    // Check if existing poster in public/posters
-    const legacyPoster = path.join(publicDir, 'posters', posterFilename);
-    if (!fs.existsSync(posterFile) && fs.existsSync(legacyPoster)) {
-      fs.copyFileSync(legacyPoster, posterFile);
-    } else {
-      generatePoster(videoFile, posterFile);
-    }
-
-    shortFormItems.push({
-      id: `sf-${path.basename(file, '.mp4')}`,
-      title: formatTitle(file),
-      type: 'short-form',
-      videoUrl: `/videos/work/short-form/${file}`,
-      posterUrl: fs.existsSync(posterFile) ? `/posters/work/${posterFilename}` : (fs.existsSync(legacyPoster) ? `/posters/${posterFilename}` : '/brand/logo-full.png'),
+function scanCategory(folder, type) {
+  const dir = path.join(workDir, folder);
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith(".mp4"))
+    .sort()
+    .map((file) => {
+      const slug = path.basename(file, ".mp4");
+      const poster = path.join(postersDir, `${slug}.jpg`);
+      makePoster(path.join(dir, file), poster);
+      return {
+        id: `${type}-${slug}`,
+        type,
+        videoUrl: `/videos/work/${folder}/${file}`,
+        posterUrl: `/posters/work/${slug}.jpg`,
+        caption: "",
+      };
     });
-  }
 }
 
-// 2. Scan ads videos
-const adsDir = path.join(workVideosDir, 'ads');
-const adsItems = [];
-if (fs.existsSync(adsDir)) {
-  const files = fs.readdirSync(adsDir).filter(f => f.endsWith('.mp4'));
-  for (const file of files) {
-    const videoFile = path.join(adsDir, file);
-    const posterFilename = `${path.basename(file, '.mp4')}.jpg`;
-    const posterFile = path.join(postersDir, posterFilename);
-
-    const legacyPoster = path.join(publicDir, 'posters', posterFilename);
-    if (!fs.existsSync(posterFile) && fs.existsSync(legacyPoster)) {
-      fs.copyFileSync(legacyPoster, posterFile);
-    } else {
-      generatePoster(videoFile, posterFile);
-    }
-
-    adsItems.push({
-      id: `ad-${path.basename(file, '.mp4')}`,
-      title: formatTitle(file),
-      type: 'ads',
-      videoUrl: `/videos/work/ads/${file}`,
-      posterUrl: fs.existsSync(posterFile) ? `/posters/work/${posterFilename}` : (fs.existsSync(legacyPoster) ? `/posters/${posterFilename}` : '/brand/logo-full.png'),
+function scanBeforeAfter() {
+  const dir = path.join(workDir, "before-after");
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isDirectory())
+    .filter((e) =>
+      ["raw.mp4", "edit.mp4"].every((f) => fs.existsSync(path.join(dir, e.name, f)))
+    )
+    .map((e) => {
+      const poster = path.join(postersDir, `${e.name}.jpg`);
+      makePoster(path.join(dir, e.name, "edit.mp4"), poster);
+      return {
+        id: `before-after-${e.name}`,
+        type: "beforeAfter",
+        rawVideoUrl: `/videos/work/before-after/${e.name}/raw.mp4`,
+        videoUrl: `/videos/work/before-after/${e.name}/edit.mp4`,
+        posterUrl: `/posters/work/${e.name}.jpg`,
+        caption: "",
+      };
     });
-  }
 }
 
-// 3. Scan before-after videos (pair-n subdirectories)
-const beforeAfterDir = path.join(workVideosDir, 'before-after');
-const beforeAfterItems = [];
-if (fs.existsSync(beforeAfterDir)) {
-  const entries = fs.readdirSync(beforeAfterDir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      const pairDir = path.join(beforeAfterDir, entry.name);
-      const rawFile = path.join(pairDir, 'raw.mp4');
-      const editFile = path.join(pairDir, 'edit.mp4');
-      if (fs.existsSync(rawFile) && fs.existsSync(editFile)) {
-        const posterFile = path.join(postersDir, `${entry.name}.jpg`);
-        generatePoster(editFile, posterFile);
-        beforeAfterItems.push({
-          id: `ba-${entry.name}`,
-          title: `Transformation ${entry.name.replace('pair-', '#')}`,
-          type: 'before-after',
-          rawVideoUrl: `/videos/work/before-after/${entry.name}/raw.mp4`,
-          editVideoUrl: `/videos/work/before-after/${entry.name}/edit.mp4`,
-          videoUrl: `/videos/work/before-after/${entry.name}/edit.mp4`,
-          posterUrl: fs.existsSync(posterFile) ? `/posters/work/${entry.name}.jpg` : '/brand/logo-full.png',
-        });
-      }
-    }
-  }
+const shortForm = scanCategory("short-form", "shortForm");
+const ads = scanCategory("ads", "ads");
+const beforeAfter = scanBeforeAfter();
+
+fs.writeFileSync(outPath, JSON.stringify({ shortForm, ads, beforeAfter }, null, 2) + "\n");
+
+console.log(
+  `portfolio.json: ${shortForm.length} short-form, ${ads.length} ads, ${beforeAfter.length} before/after pairs`
+);
+for (const item of [...shortForm, ...ads, ...beforeAfter]) {
+  const size = fs.statSync(path.join(publicDir, item.posterUrl)).size;
+  if (size > MAX_POSTER_BYTES) console.warn(`  poster over 80 KB: ${item.posterUrl} (${size} bytes)`);
 }
-
-// All items (short-form + ads + before-after)
-const allItems = [...shortFormItems, ...adsItems, ...beforeAfterItems];
-
-const portfolioData = {
-  all: allItems,
-  shortForm: shortFormItems,
-  ads: adsItems,
-  beforeAfter: beforeAfterItems,
-  counts: {
-    all: allItems.length,
-    shortForm: shortFormItems.length,
-    ads: adsItems.length,
-    beforeAfter: beforeAfterItems.length,
-  },
-};
-
-const outPath = path.join(dataDir, 'portfolio.json');
-fs.writeFileSync(outPath, JSON.stringify(portfolioData, null, 2), 'utf8');
-
-console.log('Portfolio scanned successfully:');
-console.log(`- Short-form edits: ${shortFormItems.length}`);
-console.log(`- Ad videos: ${adsItems.length}`);
-console.log(`- Before/After pairs: ${beforeAfterItems.length}`);
-console.log(`- Total in "All": ${allItems.length}`);
-console.log(`Written to: ${outPath}`);

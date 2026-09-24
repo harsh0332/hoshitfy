@@ -1,134 +1,65 @@
-"use client";
-
 import React from "react";
-import { 
-  Building2, 
-  UserCheck, 
-  GraduationCap, 
-  ShoppingBag, 
-  Bot,
-  ArrowRight
-} from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Bot, Building2, GraduationCap, ShoppingBag, UserCheck, type LucideIcon } from "lucide-react";
 import { IconTile } from "@/components/ui/IconTile";
-import { useAuditModal } from "@/context/AuditModalContext";
+import { Section, SectionHeader } from "@/components/ui/Section";
 
-interface IndustryItem {
-  name: string;
-  icon: React.ElementType;
-  description: string;
-}
-
-const industries: IndustryItem[] = [
+const industries: { name: string; icon: LucideIcon; line: string }[] = [
   {
     name: "Real estate",
     icon: Building2,
-    description: "Turn property walkthroughs and market updates into qualified buyer and investor inquiries.",
+    line: "Property walkthroughs, market updates and agent intros, ready to post every week.",
   },
   {
     name: "Personal brands & coaches",
     icon: UserCheck,
-    description: "Establish unshakeable market authority and fill your calendar with high-ticket consulting calls.",
+    line: "Talking-head Reels that build trust and keep your face in the feed.",
   },
   {
     name: "Course creators",
     icon: GraduationCap,
-    description: "Repurpose curriculum highlights into viral educational hooks that sell memberships on autopilot.",
+    line: "Lesson clips cut into short teaching videos that promote your course.",
   },
   {
     name: "E-commerce",
     icon: ShoppingBag,
-    description: "High-energy UGC, unboxing cutdowns, and Meta ad creatives built for direct checkout and lower CPAs.",
+    line: "Product, UGC and ad videos cut for Reels, Shorts and Meta Ads.",
   },
   {
     name: "AI content",
     icon: Bot,
-    description: "Hyper-realistic avatars and AI-assisted scripts that maintain 24-hour publishing without camera fatigue.",
+    line: "AI avatar and UGC-style videos, finished by human editors so they don't look robotic.",
   },
 ];
 
-export function SolutionSection() {
-  const { openAuditModal } = useAuditModal();
-
+function IndustryCard({ item }: { item: (typeof industries)[number] }) {
   return (
-    <section id="industries-section" className="relative py-20 md:py-28 bg-[#0A0A0F] overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 relative z-10">
-        {/* Section Header: Pure white heading, no pill, subline */}
-        <div className="text-center max-w-[720px] mx-auto mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
-            Industries we work with
-          </h2>
-          <p className="text-sm sm:text-base text-[#A0A0B0] max-w-[680px] mx-auto">
-            We understand the exact pacing, hook psychology, and audience nuances required in your market.
-          </p>
-        </div>
+    <div className="card h-full">
+      <IconTile icon={item.icon} />
+      <h3 className="type-h3 mt-5 text-white">{item.name}</h3>
+      <p className="type-small text-muted mt-2">{item.line}</p>
+    </div>
+  );
+}
 
-        {/* 5-Card Layout: 3 top row, 2 centered bottom row on desktop */}
-        <div className="max-w-5xl mx-auto">
-          {/* Top Row: 3 cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-            {industries.slice(0, 3).map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.name}
-                  className="p-6 sm:p-7 rounded-2xl bg-[#14141C] border border-white/[0.08] hover:border-[#A24BFF]/40 transition-all duration-300 flex flex-col justify-between group shadow-lg"
-                >
-                  <div>
-                    <div className="mb-5">
-                      <IconTile icon={Icon} size={22} color="purple" />
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                      {item.name}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[#A0A0B0] leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+export function SolutionSection() {
+  return (
+    <Section id="industries-section">
+      <SectionHeader
+        title="Industries we work with"
+        sub="Editing that fits how your audience watches."
+      />
 
-          {/* Bottom Row: 2 cards centered */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-3xl mx-auto">
-            {industries.slice(3, 5).map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.name}
-                  className="p-6 sm:p-7 rounded-2xl bg-[#14141C] border border-white/[0.08] hover:border-[#A24BFF]/40 transition-all duration-300 flex flex-col justify-between group shadow-lg"
-                >
-                  <div>
-                    <div className="mb-5">
-                      <IconTile icon={Icon} size={22} color="purple" />
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                      {item.name}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[#A0A0B0] leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Bottom CTA Button */}
-        <div className="mt-12 text-center">
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => openAuditModal("industries")}
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold"
+      {/* 3 + 2 centred on desktop, 2 + 2 + 1 centred on tablet, 1 column on phone */}
+      <div className="grid-gap mx-auto flex max-w-5xl flex-wrap justify-center">
+        {industries.map((item) => (
+          <div
+            key={item.name}
+            className="w-full md:w-[calc((100%-24px)/2)] lg:w-[calc((100%-48px)/3)]"
           >
-            <span>See What We Would Do With Your Content</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </div>
+            <IndustryCard item={item} />
+          </div>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }

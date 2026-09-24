@@ -1,52 +1,68 @@
-"use client";
-
 import React from "react";
+import fs from "fs";
+import path from "path";
+import Image from "next/image";
+import { Section, SectionHeader } from "@/components/ui/Section";
+import { site } from "@/lib/site.config";
 
-export function FounderSection() {
+/** First image in public/founder/, or null (then the "DS" monogram tile shows). Read at build time. */
+function findFounderPhoto(): string | null {
+  try {
+    const dir = path.join(process.cwd(), "public", "founder");
+    const file = fs
+      .readdirSync(dir)
+      .sort()
+      .find((f) => /\.(jpe?g|png|webp|avif)$/i.test(f));
+    return file ? `/founder/${file}` : null;
+  } catch {
+    return null;
+  }
+}
+
+export function FounderSection({ alt = false }: { alt?: boolean }) {
+  const photo = findFounderPhoto();
+  const { founder } = site;
+  const initials = founder.name
+    .split(" ")
+    .map((w) => w[0])
+    .join("");
+
   return (
-    <section className="relative py-20 md:py-28 bg-[#0A0A0F] overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        <div className="max-w-4xl mx-auto p-6 sm:p-10 md:p-12 rounded-2xl bg-[#14141C] border border-white/[0.08] shadow-2xl relative overflow-hidden">
-          {/* Subtle background ambient blur */}
-          <div className="absolute top-0 right-0 w-72 h-72 bg-[#A24BFF]/10 rounded-full blur-3xl pointer-events-none" />
+    <Section alt={alt}>
+      <SectionHeader title="Built by a marketer who got tired of late videos" />
 
-          <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-center">
-            {/* Founder Monogram Tile (DS) */}
-            <div className="flex flex-col items-center shrink-0">
-              <div
-                className="relative rounded-2xl overflow-hidden bg-[#0A0A0F] border border-white/[0.08] shadow-[0_0_30px_rgba(162,75,255,0.15)] select-none shrink-0 flex flex-col items-center justify-center"
-                style={{ width: "208px", height: "260px" }}
-              >
-                <div className="w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-3">
-                  <span className="font-heading text-3xl font-extrabold text-[#A24BFF] tracking-wider">
-                    DS
-                  </span>
-                </div>
-                <span className="text-xs uppercase tracking-widest text-[#A0A0B0] font-semibold">
-                  Founder
-                </span>
-              </div>
+      <div className="card mx-auto flex max-w-4xl flex-col items-center gap-8 md:flex-row md:gap-10">
+        <div className="relative h-[260px] w-[208px] shrink-0 overflow-hidden rounded-[20px] border border-white/[0.08] bg-[#0A0A0F]">
+          {photo ? (
+            <Image src={photo} alt={founder.name} fill sizes="208px" className="object-cover" />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center">
+              <span className="font-heading text-5xl font-extrabold text-[#A24BFF]">{initials}</span>
             </div>
+          )}
+        </div>
 
-            {/* Founder Details & Short Story (Max ~60 words) */}
-            <div className="flex flex-col text-center md:text-left">
-              <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-1.5">
-                Dhanraj Singh
-              </h3>
+        <div className="text-center md:text-left">
+          <h3 className="type-h3 text-white">{founder.name}</h3>
+          <p className="type-small text-muted mt-1">{founder.role}</p>
 
-              {/* Chips: 4 yrs · 100+ businesses on one line */}
-              <p className="text-xs sm:text-sm font-semibold text-[#A24BFF] mb-4">
-                4 years · 100+ businesses
-              </p>
+          <ul className="mt-4 flex flex-wrap justify-center gap-2 md:justify-start">
+            {[`${founder.years} years`, `${founder.clients} businesses`].map((chip) => (
+              <li key={chip} className="type-small rounded-full bg-white/[0.06] px-3 py-1 font-semibold text-white">
+                {chip}
+              </li>
+            ))}
+          </ul>
 
-              {/* Short Story (Under 60 words: exactly 43 words) */}
-              <p className="text-sm sm:text-base text-[#A0A0B0] leading-relaxed">
-                &ldquo;I built Host Editify after watching ambitious founders lose revenue to delayed, unreliable video editors. We replaced slow turnarounds with an agile 24-hour delivery system so you can focus entirely on recording and closing clients, while we transform raw clips into high-converting assets.&rdquo;
-              </p>
-            </div>
-          </div>
+          {/* Under 60 words, from the copy doc §12 */}
+          <p className="type-body text-muted mt-5">
+            For the last {founder.years} years, I&apos;ve helped {founder.clients} businesses and
+            creators grow through marketing, automation and AI. At my own agency, editors kept
+            delivering videos late, and campaigns slipped. So I built Host Editify: a dedicated
+            editing team with one goal, your video ready in {site.deliveryHours} hours.
+          </p>
         </div>
       </div>
-    </section>
+    </Section>
   );
 }

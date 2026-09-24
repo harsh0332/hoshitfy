@@ -1,52 +1,67 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import brandsData from "@/data/brands.json";
 
-interface BrandItem {
+interface Brand {
   name: string;
+  /** Path under public/, e.g. "/logos/bluhawk.png". Without it the tile shows the brand name. */
   logo?: string;
 }
 
-const brands: BrandItem[] = brandsData;
+const brands: Brand[] = brandsData;
+
+function BrandTile({ brand }: { brand: Brand }) {
+  return (
+    <div className="flex h-[60px] w-[110px] shrink-0 items-center justify-center rounded-[14px] bg-white px-3 md:h-[72px] md:w-[140px]">
+      {brand.logo ? (
+        <Image
+          src={brand.logo}
+          alt={brand.name}
+          width={112}
+          height={44}
+          className="max-h-9 w-auto object-contain md:max-h-11"
+        />
+      ) : (
+        <span className="text-center text-[13px] leading-tight font-semibold text-[#14141C] md:text-sm">
+          {brand.name}
+        </span>
+      )}
+    </div>
+  );
+}
 
 export function LogoMarquee() {
+  if (brands.length === 0) return null;
+
   return (
-    <section className="relative py-10 sm:py-12 bg-[#0E0E14] border-y border-white/[0.06] overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 mb-6 text-center">
-        <p className="text-xs uppercase tracking-widest text-[#A0A0B0] font-semibold">
-          Brands we edit for
-        </p>
+    <section aria-labelledby="brands-heading" className="section-alt overflow-hidden border-y border-white/[0.06] py-12 md:py-16">
+      <div className="container-page">
+        <h2 id="brands-heading" className="type-h3 mb-8 text-center text-white">
+          Trusted by brands we edit for
+        </h2>
+
+        {/* Desktop: one centred row */}
+        <div className="hidden flex-wrap items-center justify-center gap-6 md:flex">
+          {brands.map((b) => (
+            <BrandTile key={b.name} brand={b} />
+          ))}
+        </div>
       </div>
 
-      <div className="relative w-full overflow-hidden flex items-center">
-        {/* Left and Right Fade Gradients */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-[#0E0E14] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-[#0E0E14] to-transparent z-10 pointer-events-none" />
-
-        {/* Marquee Track */}
-        <div className="animate-marquee flex items-center gap-12 sm:gap-20 opacity-75 hover:opacity-100 transition-opacity">
-          {[...brands, ...brands, ...brands, ...brands].map((brand, idx) => (
-            <div
-              key={`${brand.name}-${idx}`}
-              className="relative shrink-0 flex items-center justify-center opacity-70 hover:opacity-100 transition-all duration-200"
-            >
-              {brand.logo ? (
-                <Image
-                  src={brand.logo}
-                  alt={brand.name}
-                  width={140}
-                  height={32}
-                  className="h-6 sm:h-7 w-auto object-contain brightness-150 contrast-125 select-none"
-                />
-              ) : (
-                <span className="text-xs sm:text-sm font-semibold tracking-wider text-white/80 whitespace-nowrap uppercase">
-                  {brand.name}
-                </span>
-              )}
-            </div>
-          ))}
+      {/* Phone: slow auto-scroll (static, swipeable row when reduced motion is on) */}
+      <div className="relative md:hidden">
+        <div className="no-scrollbar overflow-hidden motion-reduce:overflow-x-auto">
+          <div className="animate-marquee flex w-max motion-reduce:pl-5">
+            {[...brands, ...brands].map((b, i) => (
+              <div
+                key={`${b.name}-${i}`}
+                aria-hidden={i >= brands.length}
+                className={i >= brands.length ? "pr-4 motion-reduce:hidden" : "pr-4"}
+              >
+                <BrandTile brand={b} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

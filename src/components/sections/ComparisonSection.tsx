@@ -1,245 +1,179 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, X, ArrowRight } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Section, SectionHeader } from "@/components/ui/Section";
 import { useAuditModal } from "@/context/AuditModalContext";
 
-type AlternativeKey = "self" | "freelancers" | "inHouse";
+type AltKey = "self" | "freelancers" | "inHouse";
 
-interface ComparisonRow {
+/** A cell is either text or a yes/no mark (rendered as a lucide icon). */
+type Cell = string | boolean;
+
+interface Row {
   feature: string;
-  self: string;
-  freelancers: string;
-  inHouse: string;
-  hostEditify: string;
-  isBoolean?: boolean;
+  self: Cell;
+  freelancers: Cell;
+  inHouse: Cell;
+  hostEditify: Cell;
 }
 
-const comparisonRows: ComparisonRow[] = [
+// Source: copy doc §10, with 24-hour delivery
+const rows: Row[] = [
   {
-    feature: "Your Time Commitment",
-    self: "8–15 hrs/week lost",
-    freelancers: "Hours chasing briefs & revisions",
-    inHouse: "Daily directing & management",
-    hostEditify: "1 weekly sync or 100% async",
+    feature: "Your time",
+    self: "8–15 hrs a week",
+    freelancers: "Hours chasing briefs and revisions",
+    inHouse: "Hours managing and directing",
+    hostEditify: "One weekly call",
   },
   {
-    feature: "Delivery Turnaround",
-    self: "Whenever you find spare time",
-    freelancers: "Unpredictable (3–7 days)",
-    inHouse: "Depends on internal queue",
-    hostEditify: "Guaranteed in 24 hours",
+    feature: "Turnaround",
+    self: "Whenever you find time",
+    freelancers: "Unpredictable",
+    inHouse: "Depends on their workload",
+    hostEditify: "24 hours, guaranteed",
   },
   {
-    feature: "Publishing Consistency",
+    feature: "Consistency",
     self: "Breaks when you're busy",
-    freelancers: "High risk of ghosting & delay",
-    inHouse: "Stops during leave & sick days",
-    hostEditify: "Dedicated editor + backup bench",
+    freelancers: "Risk of ghosting",
+    inHouse: "Stops for leave and sick days",
+    hostEditify: "Dedicated editor + backup team",
   },
   {
-    feature: "Hiring & Overhead",
-    self: "None (heavy opportunity cost)",
-    freelancers: "Constant rehiring roulette",
-    inHouse: "Fixed salary + taxes & gear",
-    hostEditify: "Zero hiring, contracts, or overhead",
+    feature: "Hiring and management",
+    self: "None",
+    freelancers: "Constant re-hiring",
+    inHouse: "Fixed monthly salary + overhead",
+    hostEditify: "None",
   },
   {
     feature: "Try before you commit (first video free)",
-    self: "✕",
-    freelancers: "✕",
-    inHouse: "✕",
-    hostEditify: "✓ Yes (first video edited free)",
-    isBoolean: true,
+    self: false,
+    freelancers: false,
+    inHouse: false,
+    hostEditify: true,
   },
 ];
 
-const alternatives: { key: AlternativeKey; label: string }[] = [
-  { key: "self", label: "Editing Yourself" },
+const alternatives: { key: AltKey; label: string }[] = [
+  { key: "self", label: "Editing yourself" },
   { key: "freelancers", label: "Freelancers" },
-  { key: "inHouse", label: "In-House Editor" },
+  { key: "inHouse", label: "In-house editor" },
 ];
 
-export function ComparisonSection() {
-  const [selectedAlt, setSelectedAlt] = useState<AlternativeKey>("self");
-  const { openAuditModal } = useAuditModal();
+function CellValue({ value, highlight = false }: { value: Cell; highlight?: boolean }) {
+  if (value === true) {
+    return <Check className="h-5 w-5 text-[#A24BFF]" strokeWidth={2} aria-label="Yes" />;
+  }
+  if (value === false) {
+    return <X className="h-5 w-5 text-white/35" strokeWidth={2} aria-label="No" />;
+  }
+  return <span className={highlight ? "font-semibold text-white" : "text-[#A0A0B0]"}>{value}</span>;
+}
 
-  const getAlternativeLabel = (key: AlternativeKey) => {
-    return alternatives.find((a) => a.key === key)?.label || "";
-  };
+export function ComparisonSection() {
+  const [alt, setAlt] = useState<AltKey>("self");
+  const { openAuditModal } = useAuditModal();
+  const altLabel = alternatives.find((a) => a.key === alt)?.label;
 
   return (
-    <section id="why-us-section" className="relative py-20 md:py-28 bg-[#14141C] border-y border-white/[0.06] overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        {/* Section Header: Pure white heading, no pill, subline */}
-        <div className="text-center max-w-[720px] mx-auto mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
-            Why Host Editify?
-          </h2>
-          <p className="text-sm sm:text-base text-[#A0A0B0] max-w-[680px] mx-auto">
-            See how we compare to traditional options.
-          </p>
+    <Section id="why-us-section" alt>
+      <SectionHeader title="Why Host Editify?" sub="See how we compare to the usual options." />
+
+      {/* Phone: Host Editify vs one selectable alternative, no sideways scroll */}
+      <div className="lg:hidden">
+        <div role="tablist" aria-label="Compare with" className="mb-4 grid grid-cols-3 gap-1 rounded-full border border-white/[0.08] bg-[var(--card-bg)] p-1">
+          {alternatives.map((a) => (
+            <button
+              key={a.key}
+              role="tab"
+              type="button"
+              aria-selected={alt === a.key}
+              onClick={() => setAlt(a.key)}
+              className={
+                "h-10 cursor-pointer rounded-full px-2 text-[13px] leading-tight font-semibold transition-colors " +
+                (alt === a.key ? "bg-[#A24BFF] text-white" : "text-[#A0A0B0]")
+              }
+            >
+              {a.label}
+            </button>
+          ))}
         </div>
 
-        {/* Mobile View: Host Editify vs ONE Selectable Alternative (No Sideways Scroll) */}
-        <div className="block lg:hidden">
-          {/* Alternative Selector Tabs */}
-          <div className="flex items-center justify-center p-1 rounded-2xl bg-[#0A0A0F] border border-white/[0.08] mb-6">
-            {alternatives.map((alt) => (
-              <button
-                key={alt.key}
-                type="button"
-                onClick={() => setSelectedAlt(alt.key)}
-                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                  selectedAlt === alt.key
-                    ? "bg-[#A24BFF] text-white shadow-md"
-                    : "text-[#A0A0B0] hover:text-white"
-                }`}
-              >
-                {alt.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Side-by-Side 2-Column Cards Stack */}
-          <div className="space-y-4">
-            {comparisonRows.map((row, idx) => (
-              <div
-                key={idx}
-                className="p-4 sm:p-5 rounded-2xl bg-[#0A0A0F] border border-white/[0.08] shadow-md"
-              >
-                <span className="text-xs uppercase tracking-wider text-[#A0A0B0] font-semibold block mb-3">
-                  {row.feature}
-                </span>
-                <div className="grid grid-cols-2 gap-3">
-                  {/* Left: Selected Alternative */}
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.04] flex flex-col justify-between">
-                    <span className="text-[10px] uppercase font-bold text-[#A0A0B0] mb-1">
-                      {getAlternativeLabel(selectedAlt)}
-                    </span>
-                    {row.isBoolean ? (
-                      <span className="text-sm font-semibold text-white/50 flex items-center gap-1">
-                        <X className="w-3.5 h-3.5 text-white/40" /> ✕
-                      </span>
-                    ) : (
-                      <span className="text-xs text-white/80 leading-relaxed">
-                        {row[selectedAlt]}
-                      </span>
-                    )}
+        <div className="flex flex-col gap-3">
+          {rows.map((row) => (
+            <div key={row.feature} className="card !p-4">
+              <p className="type-small font-semibold text-white">{row.feature}</p>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="rounded-xl bg-white/[0.03] p-3">
+                  <p className="mb-1 text-xs text-[#A0A0B0]">{altLabel}</p>
+                  <div className="type-small">
+                    <CellValue value={row[alt]} />
                   </div>
-
-                  {/* Right: Host Editify (Highlighted with purple) */}
-                  <div className="p-3 rounded-xl bg-[#A24BFF]/[0.08] border border-[#A24BFF]/30 flex flex-col justify-between">
-                    <span className="text-[10px] uppercase font-bold text-[#A24BFF] mb-1">
-                      Host Editify
-                    </span>
-                    {row.isBoolean ? (
-                      <span className="text-sm font-bold text-white flex items-center gap-1">
-                        <Check className="w-4 h-4 text-[#A24BFF]" /> ✓ Free First Video
-                      </span>
-                    ) : (
-                      <span className="text-xs font-semibold text-white leading-relaxed">
-                        {row.hostEditify}
-                      </span>
-                    )}
+                </div>
+                <div className="rounded-xl bg-[#A24BFF]/[0.08] p-3">
+                  <p className="mb-1 text-xs font-semibold text-white">Host Editify</p>
+                  <div className="type-small">
+                    <CellValue value={row.hostEditify} highlight />
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Desktop View: Full 4-Column Table */}
-        <div className="hidden lg:block overflow-hidden rounded-2xl border border-white/[0.08] shadow-2xl bg-[#0A0A0F]">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/[0.08] bg-[#0E0E14]">
-                <th className="py-4 px-6 text-sm text-[#A0A0B0] uppercase tracking-wider w-[28%] font-semibold">
-                  What matters
-                </th>
-                <th className="py-4 px-5 text-sm font-semibold text-[#A0A0B0] w-[22%]">
-                  Editing yourself
-                </th>
-                <th className="py-4 px-5 text-sm font-semibold text-[#A0A0B0] w-[22%]">
-                  Freelancers
-                </th>
-                <th className="py-4 px-5 text-sm font-semibold text-[#A0A0B0] w-[22%]">
-                  In-house editor
-                </th>
-                <th className="py-4 px-6 text-sm font-bold text-white bg-[#A24BFF]/[0.10] border-l border-[#A24BFF]/30 w-[26%]">
-                  Host Editify
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.06]">
-              {comparisonRows.map((row, idx) => (
-                <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-4 px-6 text-sm font-semibold text-white">
-                    {row.feature}
-                  </td>
-                  <td className="py-4 px-5 text-sm text-[#A0A0B0]">
-                    {row.isBoolean ? (
-                      <span className="inline-flex items-center gap-1 text-white/50 font-semibold">
-                        ✕
-                      </span>
-                    ) : (
-                      row.self
-                    )}
-                  </td>
-                  <td className="py-4 px-5 text-sm text-[#A0A0B0]">
-                    {row.isBoolean ? (
-                      <span className="inline-flex items-center gap-1 text-white/50 font-semibold">
-                        ✕
-                      </span>
-                    ) : (
-                      row.freelancers
-                    )}
-                  </td>
-                  <td className="py-4 px-5 text-sm text-[#A0A0B0]">
-                    {row.isBoolean ? (
-                      <span className="inline-flex items-center gap-1 text-white/50 font-semibold">
-                        ✕
-                      </span>
-                    ) : (
-                      row.inHouse
-                    )}
-                  </td>
-                  <td className="py-4 px-6 text-sm font-semibold text-white bg-[#A24BFF]/[0.08] border-l border-[#A24BFF]/30">
-                    {row.isBoolean ? (
-                      <span className="inline-flex items-center gap-1.5 text-white font-bold">
-                        <Check className="w-4 h-4 text-[#A24BFF]" /> ✓ Free First Video
-                      </span>
-                    ) : (
-                      row.hostEditify
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Big Callout Under Table: Free First Edit (NO white border, subtle purple glow, no pill) */}
-        <div className="mt-12 sm:mt-16 p-8 sm:p-12 rounded-2xl bg-[#0E0E14] border border-[#A24BFF]/30 text-center relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#A24BFF]/10 rounded-full blur-3xl pointer-events-none" />
-          <h3 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4 max-w-3xl mx-auto">
-            Your first video is edited <span className="text-brand-gradient">FREE</span>. See the quality before you pay anything.
-          </h3>
-          <p className="text-sm sm:text-base text-[#A0A0B0] max-w-xl mx-auto mb-8 leading-relaxed">
-            Send us raw footage from your camera roll. If you don&apos;t love the speed, pacing, and polish, you walk away paying nothing.
-          </p>
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => openAuditModal("comparison")}
-            className="w-full sm:w-auto text-sm sm:text-base px-8 font-bold shadow-xl shadow-purple-500/20"
-          >
-            <span>Book My Free Content Audit</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
+            </div>
+          ))}
         </div>
       </div>
-    </section>
+
+      {/* Desktop: full table */}
+      <div className="hidden overflow-hidden rounded-[20px] border border-white/[0.08] bg-[var(--card-bg)] lg:block">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b border-white/[0.08]">
+              <th className="w-[26%] px-6 py-5" aria-label="Feature" />
+              {alternatives.map((a) => (
+                <th key={a.key} className="type-small w-[18%] px-5 py-5 font-semibold text-[#A0A0B0]">
+                  {a.label}
+                </th>
+              ))}
+              <th className="type-small w-[20%] bg-[#A24BFF]/[0.08] px-6 py-5 font-bold text-white">
+                Host Editify
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/[0.06]">
+            {rows.map((row) => (
+              <tr key={row.feature}>
+                <td className="type-small px-6 py-5 font-semibold text-white">{row.feature}</td>
+                {alternatives.map((a) => (
+                  <td key={a.key} className="type-small px-5 py-5">
+                    <CellValue value={row[a.key]} />
+                  </td>
+                ))}
+                <td className="type-small bg-[#A24BFF]/[0.08] px-6 py-5">
+                  <CellValue value={row.hostEditify} highlight />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Free-first-edit callout: separate card, 32px below the table */}
+      <div className="mt-8 rounded-[20px] bg-[var(--card-bg)] px-6 py-10 text-center shadow-[0_0_60px_-20px_rgba(162,75,255,0.35)] md:px-12 md:py-14">
+        <h3 className="type-h2 mx-auto max-w-3xl text-white">
+          Your first video is edited <span className="text-brand-gradient">FREE</span>. See the
+          quality before you pay anything.
+        </h3>
+        <p className="type-body text-muted mx-auto mt-4 max-w-xl">
+          Send us one raw clip. If you don&apos;t love the result, you walk away and pay nothing.
+        </p>
+        <Button onClick={() => openAuditModal("comparison")} className="mt-8">
+          Book My Free Content Audit
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Button>
+      </div>
+    </Section>
   );
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
-import { Award, X } from "lucide-react";
+import { X } from "lucide-react";
 import rawReviews from "@/data/reviews.json";
+import { Section, SectionHeader } from "@/components/ui/Section";
 
 export interface ReviewItem {
   id: string;
@@ -13,130 +15,83 @@ export interface ReviewItem {
   caption?: string;
 }
 
+// Built from public/reviews/ by `npm run reviews`. No quotes or stats live in code.
+const reviews = rawReviews as ReviewItem[];
+
+function ReviewCard({ review, onOpen, className }: { review: ReviewItem; onOpen: () => void; className?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`Enlarge review${review.caption ? `: ${review.caption}` : ""}`}
+      className={
+        "block w-full cursor-zoom-in overflow-hidden rounded-[20px] border border-white/[0.08] bg-[var(--card-bg)] text-left transition-colors hover:border-[#A24BFF]/50 " +
+        (className ?? "")
+      }
+    >
+      <Image src={review.src} alt={review.caption || "Client review"} width={600} height={750} className="h-auto w-full" />
+      {review.caption && <p className="type-small border-t border-white/[0.08] p-4 text-white/80">{review.caption}</p>}
+    </button>
+  );
+}
+
 export function ProofSection() {
-  const [activeReview, setActiveReview] = useState<ReviewItem | null>(null);
-  const reviews = rawReviews as ReviewItem[];
+  const [active, setActive] = useState<ReviewItem | null>(null);
 
-  // Hide the section completely if the folder is empty
-  if (!reviews || reviews.length === 0) {
-    return null;
-  }
-
-  // Handle Escape key to close review lightbox
   useEffect(() => {
-    if (!activeReview) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActiveReview(null);
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeReview]);
+    if (!active) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setActive(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [active]);
+
+  // Hidden until screenshots exist in public/reviews/
+  if (reviews.length === 0) return null;
 
   return (
-    <section className="relative py-16 sm:py-24 md:py-28 bg-[#0A0A0F] overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <span className="px-3.5 py-1 rounded-full text-xs uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 font-semibold">
-              <Award className="w-3.5 h-3.5" />
-              <span>Real Client Feedback</span>
-            </span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            What our clients say.
-          </h2>
-          <p className="text-sm sm:text-base text-[#A0A0B0]">
-            Screenshots and messages directly from founders and creators working with Host Editify.
-          </p>
-        </div>
+    <Section>
+      <SectionHeader
+        title="What our clients say"
+        sub="Screenshots and messages from founders and creators we edit for."
+      />
 
-        {/* Mobile: Swipe Carousel */}
-        <div className="flex sm:hidden overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 scrollbar-none">
-          {reviews.map((rev) => (
-            <div
-              key={rev.id}
-              onClick={() => setActiveReview(rev)}
-              className="min-w-[280px] max-w-[300px] snap-center shrink-0 rounded-2xl bg-[#14141C] border border-white/10 overflow-hidden cursor-pointer active:scale-[0.98] transition-all shadow-lg flex flex-col"
-            >
-              <div className="relative w-full aspect-[4/5] bg-black/40">
-                <Image
-                  src={rev.src}
-                  alt={rev.caption || rev.name || "Client review"}
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              {rev.caption && (
-                <div className="p-3 bg-[#14141C] border-t border-white/10 text-xs text-white/80 font-medium">
-                  {rev.caption}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop: Masonry Grid */}
-        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
-          {reviews.map((rev) => (
-            <div
-              key={rev.id}
-              onClick={() => setActiveReview(rev)}
-              className="rounded-2xl bg-[#14141C] border border-white/10 hover:border-purple-500/40 overflow-hidden cursor-pointer hover:scale-[1.02] transition-all duration-300 shadow-xl flex flex-col group"
-            >
-              <div className="relative w-full aspect-[4/5] bg-black/40">
-                <Image
-                  src={rev.src}
-                  alt={rev.caption || rev.name || "Client review"}
-                  fill
-                  className="object-contain group-hover:opacity-95 transition-opacity"
-                />
-              </div>
-              {rev.caption && (
-                <div className="p-3.5 bg-[#14141C] border-t border-white/10 text-xs text-white/80 font-medium">
-                  {rev.caption}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+      {/* Phone: swipe carousel */}
+      <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:hidden">
+        {reviews.map((r) => (
+          <ReviewCard key={r.id} review={r} onOpen={() => setActive(r)} className="w-[280px] shrink-0 snap-center" />
+        ))}
       </div>
 
-      {/* Tap to View Full Size Modal / Lightbox */}
-      {activeReview && (
-        <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setActiveReview(null)}
-        >
-          <button
-            type="button"
-            onClick={() => setActiveReview(null)}
-            className="absolute top-4 right-4 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer z-10"
-            aria-label="Close review"
-          >
-            <X className="w-5 h-5" />
-          </button>
+      {/* Desktop: masonry */}
+      <div className="hidden gap-6 md:block md:columns-2 lg:columns-3">
+        {reviews.map((r) => (
+          <ReviewCard key={r.id} review={r} onOpen={() => setActive(r)} className="mb-6 break-inside-avoid" />
+        ))}
+      </div>
 
+      {active &&
+        createPortal(
           <div
-            className="relative max-w-2xl max-h-[85vh] w-full h-full flex flex-col items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Review"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+            onClick={() => setActive(null)}
           >
-            <div className="relative w-full h-[75vh] max-w-lg">
-              <Image
-                src={activeReview.src}
-                alt={activeReview.caption || "Client review full size"}
-                fill
-                className="object-contain"
-              />
+            <button
+              type="button"
+              onClick={() => setActive(null)}
+              aria-label="Close review"
+              className="absolute top-4 right-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            >
+              <X className="h-5 w-5" aria-hidden />
+            </button>
+            <div className="relative h-[80svh] w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+              <Image src={active.src} alt={active.caption || "Client review"} fill className="object-contain" />
             </div>
-            {activeReview.caption && (
-              <p className="mt-3 text-xs sm:text-sm text-white/90 font-medium text-center bg-black/60 px-4 py-1.5 rounded-full border border-white/10">
-                {activeReview.caption}
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-    </section>
+          </div>,
+          document.body
+        )}
+    </Section>
   );
 }

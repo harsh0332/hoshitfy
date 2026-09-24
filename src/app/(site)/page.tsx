@@ -1,4 +1,5 @@
 import React from "react";
+import reviews from "@/data/reviews.json";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { LogoMarquee } from "@/components/sections/LogoMarquee";
 import { PortfolioSection } from "@/components/sections/PortfolioSection";
@@ -15,49 +16,26 @@ import { FaqSection } from "@/components/sections/FaqSection";
 import { BookingSection } from "@/components/sections/BookingSection";
 
 export default function LandingPage() {
+  // Backgrounds alternate #0A0A0F / #14141C. Proof is hidden until reviews exist,
+  // so the sections after it flip to keep the alternation unbroken.
+  const hasProof = reviews.length > 0;
+
   return (
-    <main className="relative flex flex-col w-full">
-      {/* Hero */}
+    <main className="relative flex w-full flex-col">
       <HeroSection />
-
-      {/* Trusted by brands */}
       <LogoMarquee />
-
-      {/* Watch our work */}
       <PortfolioSection />
-
-      {/* Are you facing the same issues? (keep WhatsApp bubbles) */}
       <PainSection />
-
-      {/* Cost of doing nothing */}
       <CostSection />
-
-      {/* Why Host Editify */}
       <ComparisonSection />
-
-      {/* Industries we work with */}
       <SolutionSection />
-
-      {/* How it works */}
       <HowItWorksSection />
-
-      {/* What you get + bonus + plans */}
       <WhatYouGetSection />
-
-      {/* Zero-risk promises */}
       <PromisesSection />
-
-      {/* What our clients say */}
       <ProofSection />
-
-      {/* Founder */}
-      <FounderSection />
-
-      {/* FAQ */}
-      <FaqSection />
-
-      {/* Final CTA */}
-      <BookingSection />
+      <FounderSection alt={hasProof} />
+      <FaqSection alt={!hasProof} />
+      <BookingSection alt={hasProof} />
     </main>
   );
 }

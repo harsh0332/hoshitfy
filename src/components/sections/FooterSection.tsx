@@ -1,112 +1,73 @@
-"use client";
-
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { site } from "@/lib/site.config";
+import { Logo } from "@/components/ui/Logo";
+import { site, whatsappLink } from "@/lib/site.config";
 
 export function FooterSection() {
-  return (
-    <footer className="relative py-16 bg-[#07070B] border-t border-white/[0.06] text-xs text-[#A0A0B0]">
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-12">
-          {/* Brand Col */}
-          <div className="md:col-span-6 flex flex-col items-start">
-            <Link href="/" className="flex items-center mb-3 group">
-              <img
-                src="/brand/logo-transparent.png"
-                alt="Host Editify"
-                style={{ height: "44px", width: "auto", objectFit: "contain", display: "block" }}
-              />
-            </Link>
+  const whatsapp = whatsappLink();
 
-            <p className="text-white font-semibold text-sm mb-2">
-              {site.tagline}
+  return (
+    <footer className="border-t border-white/[0.08] bg-[#0A0A0F] py-14 md:py-16">
+      <div className="container-page">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+          <div>
+            <Logo />
+            <p className="type-small mt-4 font-semibold text-white">{site.tagline}</p>
+            <p className="type-small text-muted mt-2 max-w-xs">
+              Short-form video editing for founders, coaches and brands in India and Dubai.
+              Production team based in India.
             </p>
-            <p className="text-[#A0A0B0] max-w-md leading-relaxed mb-4">
-              Host Editify is a specialized short-form video editing agency for founders, creators, and brands across India and Dubai.
-            </p>
-            <div className="px-3 py-1.5 rounded-lg bg-[#14141C] border border-white/[0.08] text-xs text-white/80">
-              📍 Production team based in India. Serving clients across India and Dubai.
-            </div>
           </div>
 
-          {/* Direct Communication */}
-          <div className="md:col-span-3">
-            <h4 className="text-white font-bold uppercase tracking-wider mb-4 text-xs">
-              Direct Contact
-            </h4>
-            <div className="space-y-2.5">
-              <p>
-                <a
-                  href={`mailto:${site.links.email}`}
-                  className="hover:text-white transition-colors"
-                >
+          <div>
+            <h3 className="type-small font-semibold text-white">Contact</h3>
+            <ul className="type-small text-muted mt-4 flex flex-col gap-3">
+              <li>
+                <a href={`mailto:${site.links.email}`} className="transition-colors hover:text-white">
                   {site.links.email}
                 </a>
-              </p>
-              <p>
-                <a
-                  href={`https://wa.me/${site.links.whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
-                  WhatsApp Support
-                </a>
-              </p>
-              <p className="text-[#666678] text-[11px]">
-                Mon–Fri, Active IST &amp; GST Business Hours
-              </p>
-            </div>
+              </li>
+              {whatsapp && (
+                <li>
+                  <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
+                    WhatsApp
+                  </a>
+                </li>
+              )}
+              <li>Mon–Fri, IST and GST business hours</li>
+            </ul>
           </div>
 
-          {/* Links & Socials */}
-          <div className="md:col-span-3">
-            <h4 className="text-white font-bold uppercase tracking-wider mb-4 text-xs">
-              Connect &amp; Legal
-            </h4>
-            <div className="space-y-2.5">
-              <p>
-                <a
-                  href={site.links.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
+          <div>
+            <h3 className="type-small font-semibold text-white">Links</h3>
+            <ul className="type-small text-muted mt-4 flex flex-col gap-3">
+              <li>
+                <a href={site.links.instagram} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
                   Instagram
                 </a>
-              </p>
-              <p>
-                <a
-                  href={site.links.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-white transition-colors"
-                >
+              </li>
+              <li>
+                <a href={site.links.linkedin} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
                   LinkedIn
                 </a>
-              </p>
-              <p>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+              </li>
+              <li>
+                <Link href="/privacy" className="transition-colors hover:text-white">
                   Privacy Policy
                 </Link>
-              </p>
-              <p>
-                <Link href="/terms" className="hover:text-white transition-colors">
+              </li>
+              <li>
+                <Link href="/terms" className="transition-colors hover:text-white">
                   Terms of Service
                 </Link>
-              </p>
-            </div>
+              </li>
+            </ul>
           </div>
         </div>
 
-        {/* Copyright & Disclaimer (No TikTok) */}
-        <div className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#666678]">
+        <div className="mt-12 flex flex-col gap-2 border-t border-white/[0.08] pt-8 text-xs text-[#A0A0B0] md:flex-row md:justify-between">
           <p>© {new Date().getFullYear()} Host Editify. All rights reserved.</p>
-          <p>
-            Not endorsed by or affiliated with Meta Platforms, Instagram, or YouTube.
-          </p>
+          <p>Not endorsed by or affiliated with Meta, Instagram or YouTube.</p>
         </div>
       </div>
     </footer>

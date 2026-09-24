@@ -1,75 +1,69 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Minus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Minus, Plus } from "lucide-react";
+import { Section, SectionHeader } from "@/components/ui/Section";
 import { site } from "@/lib/site.config";
+import { cn } from "@/lib/utils";
 
+// Source: copy doc §11 and questionnaire §4
 const faqs = [
   {
     q: "Won't AI editing look cheap and robotic?",
-    a: "No. Around 80% of every video is edited by human creative editors. AI only assists with B-roll sourcing, audio leveling, and visual pacing consistency. Your audience sees a polished, human-crafted video—never robotic AI slop.",
+    a: "No. Around 80% of every video is edited by our human editors. AI only helps with B-roll and visual consistency. Your audience sees a polished video, not “AI content”.",
   },
   {
     q: "My nephew or an intern can use CapCut.",
-    a: "Most people know how to trim clips in CapCut or VN. You are not paying for editing software; you are paying for reliable weekly delivery, immaculate visual authority, and the hours you get back to close high-ticket clients.",
+    a: "Most people can use CapCut. You're not paying for the software. You're paying for reliable delivery every week, a professional look, and the authority that consistency builds.",
   },
   {
-    q: "How does remote coordination work across India and Dubai?",
-    a: "Our core production team is based in India and operates directly across Indian (IST) and Dubai (GST) business hours. You drop raw files in a shared Google Drive folder, get immediate updates on WhatsApp, and meet us weekly on Google Meet. Being remote is exactly why we deliver within 24 hours at exceptional efficiency.",
+    q: "How do we work together across India and Dubai?",
+    a: "Our production team is in India and works on Indian and Dubai business hours. You share footage in a Google Drive folder, get updates on WhatsApp, and meet us weekly on Google Meet. Working remotely is exactly why we can deliver in 24 hours.",
   },
   {
-    q: "What does 24 hours mean exactly?",
+    q: `What does ${site.deliveryHours} hours mean exactly?`,
     a: site.deliveryFinePrint,
   },
   {
     q: "What don't you do?",
-    a: "We specialize strictly in high-retention short-form video editing for founders, coaches, and brands. We do NOT film on-site or provide camera crews (we edit the raw footage you shoot on your phone), we do NOT do weddings or social event videos, we do NOT shoot corporate documentaries, and we do NOT create heavy 3D CGI or character VFX. Staying 100% focused on short-form editing is why our 24-hour delivery turnaround never slips.",
+    a: "We only edit. We don't film or send camera crews, and we don't do weddings, events, corporate films, or heavy VFX and 3D animation.",
   },
   {
-    q: "Do you do multi-language subtitles?",
-    a: "Yes. While our primary team communicates and edits in English, we provide accurate subtitles and captions in English, Hindi, and Arabic upon request.",
-  },
-  {
-    q: "Which time zone do you work in?",
-    a: "We operate across Indian IST (UTC+5:30) and Dubai GST (UTC+4), Monday through Friday. Your dedicated editor is online and responsive during your active business day.",
+    q: "Do you do subtitles in other languages?",
+    a: "Yes. We edit in English and can add English or Arabic subtitles.",
   },
   {
     q: "I already have an editor.",
-    a: "Keep them! Many of our clients keep their in-house or freelance editor and use Host Editify for overflow capacity so their posting schedule never breaks when their team is overloaded, sick, or on holiday.",
+    a: "Keep them. Many clients use us for overflow, so their content never stops when their editor is overloaded or away.",
   },
   {
     q: "What if I don't like the edits?",
-    a: "You see your first short-form video (up to 40 seconds) edited completely free before paying anything. Once onboarded, every video includes 2 revision rounds (4 on Authority) to guarantee it matches your exact aesthetic.",
+    a: `You see your first video (up to ${site.freeFirstVideoMaxSeconds} seconds) edited free before paying anything. After that, every video gets ${site.revisions.growth} revision rounds (${site.revisions.authority} on Authority).`,
   },
   {
     q: "It looks expensive.",
-    a: "Compare it to losing 8–15 hours of your highest-value sales time every week, or the heavy monthly expense of recruiting, training, and managing a full-time in-house editor. On your free audit call, we will break down the exact ROI numbers for your business.",
+    a: "Compare it to 8–15 hours of your time every week, or to the salary and management of a full-time editor. On the call, we'll show you the numbers for your business.",
   },
   ...(site.priceLockPromise
     ? [
         {
           q: "Will the price go up after a month or two?",
-          a: "No. Your plan price stays locked for as long as you maintain your monthly partnership with us.",
+          a: "No. Your plan price stays locked for as long as you stay with us.",
         },
       ]
     : []),
   {
     q: "Is my footage safe?",
-    a: "Yes. We execute a mutual Non-Disclosure Agreement (NDA) before any files are shared. All client raw footage and project archives are stored on encrypted drives, and you retain 100% intellectual property ownership.",
+    a: "Yes. We sign an NDA, store files encrypted, and you own everything.",
   },
   {
     q: "I need to think about it.",
-    a: "That is completely fine. Start with the free audit and free sample edit. There is zero financial commitment or risk until you have experienced the 24-hour turnaround firsthand.",
+    a: "That's fine. Start with the free edit. There's nothing to decide until you've seen the result.",
   },
 ];
 
-export function FaqSection() {
+export function FaqSection({ alt = false }: { alt?: boolean }) {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
-
-  const toggleFaq = (idx: number) => {
-    setOpenIdx(openIdx === idx ? null : idx);
-  };
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -77,75 +71,51 @@ export function FaqSection() {
     mainEntity: faqs.map((f) => ({
       "@type": "Question",
       name: f.q,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: f.a,
-      },
+      acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
 
   return (
-    <section id="faq-section" className="relative py-20 md:py-28 bg-[#14141C] border-y border-white/[0.06] overflow-hidden">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+    <Section id="faq-section" alt={alt}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
-      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        {/* Section Header: Pure white heading, no pill, subline */}
-        <div className="text-center max-w-[720px] mx-auto mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
-            Frequently asked questions
-          </h2>
-          <p className="text-sm sm:text-base text-[#A0A0B0] max-w-[680px] mx-auto">
-            Everything you need to know about turnaround times, remote coordination, and file ownership.
-          </p>
-        </div>
+      <SectionHeader title="Frequently asked questions" />
 
-        {/* Accordion Stack: max-w-[760px] */}
-        <div className="max-w-[760px] mx-auto space-y-3">
-          {faqs.map((item, idx) => {
-            const isOpen = openIdx === idx;
-            return (
-              <div
-                key={idx}
-                className={cn(
-                  "rounded-2xl border transition-all duration-200 overflow-hidden",
-                  isOpen
-                    ? "bg-[#0A0A0F] border-[#A24BFF]/40 shadow-lg"
-                    : "bg-[#0A0A0F]/60 border-white/[0.08] hover:border-white/20"
-                )}
+      <div className="mx-auto flex max-w-[760px] flex-col gap-3">
+        {faqs.map((item, idx) => {
+          const open = openIdx === idx;
+          const panelId = `faq-panel-${idx}`;
+          return (
+            <div
+              key={item.q}
+              className={cn(
+                "rounded-[20px] border bg-[var(--card-bg)] transition-colors",
+                open ? "border-[#A24BFF]/40" : "border-white/[0.08]"
+              )}
+            >
+              <button
+                type="button"
+                onClick={() => setOpenIdx(open ? null : idx)}
+                aria-expanded={open}
+                aria-controls={panelId}
+                className="flex w-full cursor-pointer items-center justify-between gap-4 p-5 text-left md:p-6"
               >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer select-none"
-                  aria-expanded={isOpen}
-                >
-                  <span className="text-base sm:text-lg font-bold text-white leading-snug">
-                    {item.q}
-                  </span>
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center shrink-0 border border-white/[0.08]">
-                    {isOpen ? (
-                      <Minus className="w-4 h-4 text-[#A24BFF]" strokeWidth={2} />
-                    ) : (
-                      <Plus className="w-4 h-4 text-white/70" strokeWidth={2} />
-                    )}
-                  </div>
-                </button>
-
-                <div
-                  className={cn(
-                    "faq-answer px-5 pb-6 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base text-[#A0A0B0] leading-relaxed border-t border-white/[0.06] mt-1 font-normal",
-                    !isOpen && "hidden"
+                <span className="type-body font-semibold text-white">{item.q}</span>
+                <span className="icon-tile !h-9 !w-9 !rounded-full">
+                  {open ? (
+                    <Minus className="h-5 w-5 text-[#A24BFF]" strokeWidth={1.75} aria-hidden />
+                  ) : (
+                    <Plus className="h-5 w-5 text-white/70" strokeWidth={1.75} aria-hidden />
                   )}
-                >
-                  {item.a}
-                </div>
+                </span>
+              </button>
+              <div id={panelId} hidden={!open} className="type-body text-muted px-5 pb-6 md:px-6">
+                {item.a}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
-    </section>
+    </Section>
   );
 }

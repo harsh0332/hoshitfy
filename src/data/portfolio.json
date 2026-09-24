@@ -1,141 +1,49 @@
 {
-  "all": [
-    {
-      "id": "sf-ai-avatar-dubai",
-      "title": "AI Avatar Dubai",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/ai-avatar-dubai.mp4",
-      "posterUrl": "/posters/work/ai-avatar-dubai.jpg"
-    },
-    {
-      "id": "sf-ai-avatar-ugc",
-      "title": "AI Avatar UGC",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/ai-avatar-ugc.mp4",
-      "posterUrl": "/posters/work/ai-avatar-ugc.jpg"
-    },
-    {
-      "id": "sf-founder-story",
-      "title": "Founder Story",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/founder-story.mp4",
-      "posterUrl": "/posters/work/founder-story.jpg"
-    },
-    {
-      "id": "sf-founder-voice",
-      "title": "Founder Voice",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/founder-voice.mp4",
-      "posterUrl": "/posters/work/founder-voice.jpg"
-    },
-    {
-      "id": "sf-hero-showreel",
-      "title": "Hero Showreel",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/hero-showreel.mp4",
-      "posterUrl": "/posters/work/hero-showreel.jpg"
-    },
-    {
-      "id": "sf-personal-brand-short",
-      "title": "Personal Brand Short",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/personal-brand-short.mp4",
-      "posterUrl": "/posters/work/personal-brand-short.jpg"
-    },
-    {
-      "id": "sf-vfx-hook",
-      "title": "VFX Hook",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/vfx-hook.mp4",
-      "posterUrl": "/posters/work/vfx-hook.jpg"
-    },
-    {
-      "id": "ad-motion-intro",
-      "title": "Motion Intro",
-      "type": "ads",
-      "videoUrl": "/videos/work/ads/motion-intro.mp4",
-      "posterUrl": "/posters/work/motion-intro.jpg"
-    },
-    {
-      "id": "ad-saas-product",
-      "title": "SaaS Product",
-      "type": "ads",
-      "videoUrl": "/videos/work/ads/saas-product.mp4",
-      "posterUrl": "/posters/work/saas-product.jpg"
-    }
-  ],
   "shortForm": [
     {
-      "id": "sf-ai-avatar-dubai",
-      "title": "AI Avatar Dubai",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/ai-avatar-dubai.mp4",
-      "posterUrl": "/posters/work/ai-avatar-dubai.jpg"
+      "id": "shortForm-ai-cinematic-reel",
+      "type": "shortForm",
+      "videoUrl": "/videos/work/short-form/ai-cinematic-reel.mp4",
+      "posterUrl": "/posters/work/ai-cinematic-reel.jpg",
+      "caption": ""
     },
     {
-      "id": "sf-ai-avatar-ugc",
-      "title": "AI Avatar UGC",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/ai-avatar-ugc.mp4",
-      "posterUrl": "/posters/work/ai-avatar-ugc.jpg"
+      "id": "shortForm-founder-reel-1",
+      "type": "shortForm",
+      "videoUrl": "/videos/work/short-form/founder-reel-1.mp4",
+      "posterUrl": "/posters/work/founder-reel-1.jpg",
+      "caption": ""
     },
     {
-      "id": "sf-founder-story",
-      "title": "Founder Story",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/founder-story.mp4",
-      "posterUrl": "/posters/work/founder-story.jpg"
+      "id": "shortForm-founder-reel-2",
+      "type": "shortForm",
+      "videoUrl": "/videos/work/short-form/founder-reel-2.mp4",
+      "posterUrl": "/posters/work/founder-reel-2.jpg",
+      "caption": ""
     },
     {
-      "id": "sf-founder-voice",
-      "title": "Founder Voice",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/founder-voice.mp4",
-      "posterUrl": "/posters/work/founder-voice.jpg"
-    },
-    {
-      "id": "sf-hero-showreel",
-      "title": "Hero Showreel",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/hero-showreel.mp4",
-      "posterUrl": "/posters/work/hero-showreel.jpg"
-    },
-    {
-      "id": "sf-personal-brand-short",
-      "title": "Personal Brand Short",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/personal-brand-short.mp4",
-      "posterUrl": "/posters/work/personal-brand-short.jpg"
-    },
-    {
-      "id": "sf-vfx-hook",
-      "title": "VFX Hook",
-      "type": "short-form",
-      "videoUrl": "/videos/work/short-form/vfx-hook.mp4",
-      "posterUrl": "/posters/work/vfx-hook.jpg"
+      "id": "shortForm-founder-reel-3",
+      "type": "shortForm",
+      "videoUrl": "/videos/work/short-form/founder-reel-3.mp4",
+      "posterUrl": "/posters/work/founder-reel-3.jpg",
+      "caption": ""
     }
   ],
   "ads": [
     {
-      "id": "ad-motion-intro",
-      "title": "Motion Intro",
+      "id": "ads-ai-product-ad",
       "type": "ads",
-      "videoUrl": "/videos/work/ads/motion-intro.mp4",
-      "posterUrl": "/posters/work/motion-intro.jpg"
+      "videoUrl": "/videos/work/ads/ai-product-ad.mp4",
+      "posterUrl": "/posters/work/ai-product-ad.jpg",
+      "caption": ""
     },
     {
-      "id": "ad-saas-product",
-      "title": "SaaS Product",
+      "id": "ads-motion-graphics-ad",
       "type": "ads",
-      "videoUrl": "/videos/work/ads/saas-product.mp4",
-      "posterUrl": "/posters/work/saas-product.jpg"
+      "videoUrl": "/videos/work/ads/motion-graphics-ad.mp4",
+      "posterUrl": "/posters/work/motion-graphics-ad.jpg",
+      "caption": ""
     }
   ],
-  "beforeAfter": [],
-  "counts": {
-    "all": 9,
-    "shortForm": 7,
-    "ads": 2,
-    "beforeAfter": 0
-  }
+  "beforeAfter": []
 }
