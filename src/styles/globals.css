@@ -190,3 +190,12 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Form selects: dim the "Select…" placeholder like input placeholders */
+select:has(option[value=""]:checked) {
+  color: rgba(255, 255, 255, 0.35);
+}
+select option {
+  color: #fff;
+  background: #14141C;
+}

@@ -1,26 +1,116 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import Cal, { getCalApi } from "@calcom/embed-react";
-import { X, ArrowRight, ArrowLeft, Send, Sparkles, MessageCircle, Calendar } from "lucide-react";
-import { leadSchema, LeadFormData } from "@/lib/lead.schema";
-import { site } from "@/lib/site.config";
-import { generateEventId, trackPixelEvent, getStoredUtm, captureAndStoreUtm } from "@/lib/tracking";
+import { ArrowLeft, ArrowRight, Calendar, Send, Sparkles, X } from "lucide-react";
+import {
+  BUDGETS,
+  CURRENT_EDITOR,
+  INDUSTRIES,
+  MONTHLY_VIDEOS,
+  PLANS,
+  isQualifiedBudget,
+  leadSchema,
+  type LeadFormData,
+} from "@/lib/lead.schema";
+import { site, whatsappLink } from "@/lib/site.config";
+import { captureAndStoreUtm, generateEventId, getStoredUtm, trackPixelEvent } from "@/lib/tracking";
 import { Button } from "@/components/ui/Button";
+import { WhatsAppIcon } from "@/components/ui/WhatsAppIcon";
 import { cn } from "@/lib/utils";
 
 const countryCodes = [
-  { code: "+971", country: "UAE" },
   { code: "+91", country: "India" },
+  { code: "+971", country: "UAE" },
   { code: "+966", country: "Saudi Arabia" },
   { code: "+974", country: "Qatar" },
   { code: "+968", country: "Oman" },
   { code: "+44", country: "UK" },
   { code: "+1", country: "USA/Canada" },
 ];
+
+/** Guess the visitor's dialling code from timezone, then locale. Defaults to India. */
+function detectCountryCode(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    if (tz === "Asia/Dubai") return "+971";
+    if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta") return "+91";
+    const region = (navigator.language.split("-")[1] || "").toUpperCase();
+    if (region === "AE") return "+971";
+  } catch {}
+  return "+91";
+}
+
+const STORAGE_KEY = "host_editify_form";
+const stepFields: Record<1 | 2, (keyof LeadFormData)[]> = {
+  1: ["name", "whatsapp", "email"],
+  2: ["businessName", "industry", "monthlyVideos", "currentEditor"],
+};
+const stepLabels = { 1: "Contact details", 2: "Your business", 3: "Goals and budget" } as const;
+
+const inputBase =
+  "w-full rounded-xl border bg-[#0A0A0F] px-4 py-3 text-[15px] text-white outline-none transition-colors placeholder:text-white/35 focus:border-[#A24BFF]";
+
+function Field({
+  label,
+  error,
+  htmlFor,
+  optional,
+  children,
+}: {
+  label: string;
+  error?: string;
+  htmlFor: string;
+  optional?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="type-small mb-1.5 block font-semibold text-white">
+        {label}
+        {optional && <span className="font-normal text-[#A0A0B0]"> (optional)</span>}
+      </label>
+      {children}
+      {error && (
+        <p role="alert" className="mt-1.5 text-[13px] text-[#FF3D8B]">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Select({
+  id,
+  placeholder,
+  options,
+  invalid,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement> & {
+  placeholder: string;
+  options: readonly string[];
+  invalid?: boolean;
+}) {
+  return (
+    <select
+      id={id}
+      className={cn(inputBase, "cursor-pointer", invalid ? "border-[#FF3D8B]" : "border-white/10")}
+      {...props}
+    >
+      <option value="" disabled>
+        {placeholder}
+      </option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 interface AuditModalProps {
   isOpen: boolean;
@@ -29,601 +119,523 @@ interface AuditModalProps {
 
 export function AuditModal({ isOpen, onClose }: AuditModalProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [selectedCountryCode, setSelectedCountryCode] = useState("+971");
+  const [countryCode, setCountryCode] = useState("+91");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<{
-    qualified: boolean;
-    data: LeadFormData;
-  } | null>(null);
-
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ qualified: boolean; data: LeadFormData } | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
     handleSubmit,
     setValue,
+    setError,
     watch,
     trigger,
     formState: { errors },
   } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
+    // Nothing preselected: every choice starts empty and is required
     defaultValues: {
-      monthlyVideos: "5–10",
-      currentEditor: "Myself",
-      budgetRange: "$500–$1,000",
-      preferredPlan: "Authority",
-      industry: "Real estate",
-      qualified: true,
-    },
+      name: "",
+      whatsapp: "",
+      email: "",
+      businessName: "",
+      socialLink: "",
+      contentChallenge: "",
+      qualified: false,
+    } as Partial<LeadFormData>,
   });
 
   const formValues = watch();
 
-  // Load saved progress from sessionStorage & capture UTM
+  // Country code from timezone, restore saved progress, capture UTM
   useEffect(() => {
+    setCountryCode(detectCountryCode());
     captureAndStoreUtm();
     try {
-      const saved = sessionStorage.getItem("host_editify_form");
+      const saved = sessionStorage.getItem(STORAGE_KEY);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        Object.keys(parsed).forEach((k) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setValue(k as any, parsed[k]);
+        const parsed = JSON.parse(saved) as Partial<LeadFormData> & { countryCode?: string };
+        if (parsed.countryCode) setCountryCode(parsed.countryCode);
+        (Object.keys(parsed) as (keyof LeadFormData)[]).forEach((k) => {
+          if (k in leadSchema.shape && parsed[k] !== undefined && parsed[k] !== "") {
+            setValue(k, parsed[k] as never);
+          }
         });
       }
     } catch {}
   }, [setValue]);
 
-  // Persist form changes in sessionStorage
   useEffect(() => {
     try {
-      sessionStorage.setItem("host_editify_form", JSON.stringify(formValues));
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ ...formValues, countryCode }));
     } catch {}
-  }, [formValues]);
+  }, [formValues, countryCode]);
 
-  // Body scroll locking and Focus Trap + Escape key listener
+  // Scroll lock, focus trap, Escape
   useEffect(() => {
     if (!isOpen) return;
-
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
-    // Auto-focus first input
     const focusTimeout = setTimeout(() => {
-      const firstInput = modalRef.current?.querySelector<HTMLElement>(
-        "input, select, textarea, button"
-      );
-      firstInput?.focus();
+      modalRef.current?.querySelector<HTMLElement>("input, select, textarea")?.focus();
     }, 50);
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-
-      if (e.key === "Tab" && modalRef.current) {
-        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusableElements.length === 0) return;
-
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
-            lastElement.focus();
-            e.preventDefault();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            firstElement.focus();
-            e.preventDefault();
-          }
-        }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return onClose();
+      if (e.key !== "Tab" || !modalRef.current) return;
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        last.focus();
+        e.preventDefault();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        first.focus();
+        e.preventDefault();
       }
     };
-
-    window.addEventListener("keydown", handleKeyDown);
-
+    window.addEventListener("keydown", onKey);
     return () => {
       clearTimeout(focusTimeout);
       document.body.style.overflow = originalOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", onKey);
     };
   }, [isOpen, onClose]);
 
-  // Initialize Cal.com Embed API & listen for successful booking
+  // Cal.com embed: on booking, fire Schedule and go to the thank-you page
   useEffect(() => {
-    if (submissionResult?.qualified) {
-      (async function () {
-        const cal = await getCalApi();
-        cal("ui", {
-          theme: "dark",
-          styles: { branding: { brandColor: "#A24BFF" } },
-          hideEventTypeDetails: false,
-          layout: "month_view",
-        });
-        cal("on", {
-          action: "bookingSuccessful",
-          callback: () => {
-            const eventId = generateEventId();
-            trackPixelEvent("Schedule", { channel: "cal.com" }, eventId);
-            window.location.href = "/thank-you";
-          },
-        });
-      })();
-    }
-  }, [submissionResult]);
+    if (!result?.qualified) return;
+    (async () => {
+      const cal = await getCalApi();
+      cal("ui", {
+        theme: "dark",
+        styles: { branding: { brandColor: "#A24BFF" } },
+        hideEventTypeDetails: false,
+        layout: "month_view",
+      });
+      cal("on", {
+        action: "bookingSuccessful",
+        callback: () => {
+          trackPixelEvent("Schedule", { channel: "cal.com" }, generateEventId());
+          window.location.href = "/thank-you";
+        },
+      });
+    })();
+  }, [result]);
 
   if (!isOpen) return null;
 
+  const fullNumber = () => `${countryCode}${(formValues.whatsapp || "").replace(/\D/g, "")}`;
+
   const handleNextStep = async () => {
-    let isValid = false;
+    if (step === 3) return;
+    const valid = await trigger(stepFields[step]);
+    if (!valid) return;
     if (step === 1) {
-      isValid = await trigger(["name", "whatsapp", "email"]);
-      if (isValid) {
-        const fullNumber = `${selectedCountryCode}${formValues.whatsapp.replace(/\D/g, "")}`;
-        const parsed = parsePhoneNumberFromString(fullNumber);
-        if (!parsed || !parsed.isValid()) {
-          if (formValues.whatsapp.length < 8) return;
-        }
-        setStep(2);
+      const parsed = parsePhoneNumberFromString(fullNumber());
+      if (!parsed || !parsed.isValid()) {
+        setError("whatsapp", { message: "Please enter a valid WhatsApp number" });
+        return;
       }
-    } else if (step === 2) {
-      isValid = await trigger(["businessName", "industry", "monthlyVideos", "currentEditor"]);
-      if (isValid) setStep(3);
     }
+    setStep((step + 1) as 2 | 3);
   };
 
   const onSubmit = async (data: LeadFormData) => {
     setIsSubmitting(true);
-    const isQualified = data.budgetRange !== "Under $500";
+    setSubmitError(null);
+    const qualified = isQualifiedBudget(data.budgetRange);
     const eventId = generateEventId();
-    const utmData = getStoredUtm();
-
     const payload: LeadFormData = {
       ...data,
-      whatsapp: `${selectedCountryCode} ${data.whatsapp}`,
-      qualified: isQualified,
+      whatsapp: `${countryCode} ${data.whatsapp.trim()}`,
+      qualified,
       eventId,
-      utm: utmData,
+      utm: getStoredUtm(),
     };
 
     try {
-      trackPixelEvent(
-        "Lead",
-        {
-          currency: "USD",
-          value: isQualified ? 500 : 0,
-          lead_type: isQualified ? "qualified" : "unqualified",
-        },
-        eventId
-      );
-
-      await fetch("/api/lead", {
+      const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body?.error || `HTTP ${res.status}`);
+      if (body?.warning) console.warn("[lead]", body.warning);
+      const confirmedQualified: boolean = typeof body?.qualified === "boolean" ? body.qualified : qualified;
 
-      setSubmissionResult({ qualified: isQualified, data: payload });
+      trackPixelEvent(
+        "Lead",
+        {
+          currency: "USD",
+          value: confirmedQualified ? 500 : 0,
+          lead_type: confirmedQualified ? "qualified" : "unqualified",
+        },
+        eventId
+      );
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {}
+      setResult({ qualified: confirmedQualified, data: payload });
     } catch (err) {
-      console.error("Submission failed:", err);
-      setSubmissionResult({ qualified: isQualified, data: payload });
+      console.error("Lead submission failed:", err);
+      setSubmitError(
+        "We couldn't send your details. Please try again" +
+          (site.links.whatsapp ? ", or message us on WhatsApp." : `, or email ${site.links.email}.`)
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const sampleEditHref = whatsappLink("Hi Host Editify, I'd like to request a free sample edit.");
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={onClose}
     >
-      {/* Modal Dialog (Bottom sheet on phone, centered modal on desktop) */}
       <div
         ref={modalRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="audit-modal-title"
-        className="relative w-full max-h-[92vh] sm:max-h-[90vh] sm:max-w-2xl bg-[#14141C] border border-white/15 rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 sm:zoom-in-95 duration-200"
+        className="relative flex max-h-[92svh] w-full flex-col overflow-hidden rounded-t-[24px] border border-white/15 bg-[#14141C] shadow-2xl sm:max-h-[90svh] sm:max-w-xl sm:rounded-[24px]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Mobile handle indicator */}
-        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mt-3 mb-1 sm:hidden shrink-0" />
+        <div className="mx-auto mt-3 mb-1 h-1.5 w-12 shrink-0 rounded-full bg-white/20 sm:hidden" />
 
-        {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors cursor-pointer z-30"
-          aria-label="Close modal"
+          aria-label="Close"
+          className="absolute top-4 right-4 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
         >
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" aria-hidden />
         </button>
 
-        <div className="p-6 sm:p-8 overflow-y-auto max-h-[calc(92vh-2rem)] sm:max-h-[calc(90vh-2rem)]">
-          {!submissionResult ? (
-            <div>
-              {/* Modal Header */}
-              <div className="mb-6 pr-8">
-                <span className="px-3 py-1 rounded-full text-[11px] uppercase tracking-wider bg-brand-gradient text-white font-bold inline-block mb-2">
-                  Free 30-Min Content Audit
-                </span>
-                <h3 id="audit-modal-title" className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  Book Your Free Content Audit
+        <div className="overflow-y-auto p-6 sm:p-8">
+          {!result ? (
+            <>
+              <div className="mb-6 pr-10">
+                <h3 id="audit-modal-title" className="type-h3 text-white">
+                  Claim your free content audit
                 </h3>
-                <p className="text-xs sm:text-sm text-[#A0A0B0] mt-1">
-                  We review your videos before the call and edit your first video free.
+                <p className="type-small text-muted mt-2">
+                  Free {site.callMinutes}-min call. We review your profile before the call and edit
+                  your first video free.
                 </p>
               </div>
 
-              {/* Step Progress Indicator */}
               <div className="mb-6">
-                <div className="flex items-center justify-between text-xs font-semibold mb-2">
-                  <span className="text-[#1EC8FF]">STEP {step} OF 3</span>
-                  <span className="text-[#A0A0B0]">
-                    {step === 1 ? "Contact Details" : step === 2 ? "Business & Content" : "Goals & Budget"}
-                  </span>
+                <div className="type-small mb-2 flex items-center justify-between font-semibold">
+                  <span className="text-[#A24BFF]">Step {step} of 3</span>
+                  <span className="text-[#A0A0B0]">{stepLabels[step]}</span>
                 </div>
-                <div className="w-full h-1.5 bg-black/60 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-brand-gradient transition-all duration-300"
-                    style={{ width: `${(step / 3) * 100}%` }}
-                  />
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/60">
+                  <div className="bg-brand-gradient h-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
                 </div>
               </div>
 
-              {/* Multi-step Form */}
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* STEP 1: Contact Details */}
+              <form onSubmit={handleSubmit(onSubmit)} noValidate>
                 {step === 1 && (
-                  <div className="space-y-4 animate-in fade-in-50 duration-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Your Full Name *
-                      </label>
+                  <div className="flex flex-col gap-4">
+                    <Field label="Your name" htmlFor="lead-name" error={errors.name?.message}>
                       <input
+                        id="lead-name"
+                        autoComplete="name"
+                        placeholder="Your full name"
                         {...register("name")}
-                        placeholder="e.g. Tariq Al Mansoori"
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl bg-[#0A0A0F] border text-white placeholder-white/30 text-sm outline-none transition-colors",
-                          errors.name ? "border-red-500" : "border-white/10 focus:border-purple-500"
-                        )}
+                        className={cn(inputBase, errors.name ? "border-[#FF3D8B]" : "border-white/10")}
                       />
-                      {errors.name && (
-                        <p className="text-red-400 text-xs mt-1">{errors.name.message}</p>
-                      )}
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        WhatsApp Number (for call details &amp; edits) *
-                      </label>
+                    <Field label="WhatsApp number" htmlFor="lead-whatsapp" error={errors.whatsapp?.message}>
                       <div className="flex gap-2">
                         <select
-                          value={selectedCountryCode}
-                          onChange={(e) => setSelectedCountryCode(e.target.value)}
-                          className="px-2.5 py-3 rounded-xl bg-[#0A0A0F] border border-white/10 text-white text-xs outline-none cursor-pointer"
+                          aria-label="Country code"
+                          value={countryCode}
+                          onChange={(e) => setCountryCode(e.target.value)}
+                          className={cn(inputBase, "w-auto shrink-0 cursor-pointer border-white/10 px-3")}
                         >
                           {countryCodes.map((c) => (
-                            <option key={c.code} value={c.code}>
-                              {c.code} ({c.country})
+                            <option key={c.code} value={c.code} aria-label={`${c.country} ${c.code}`}>
+                              {c.code}
                             </option>
                           ))}
                         </select>
                         <input
-                          {...register("whatsapp")}
+                          id="lead-whatsapp"
                           type="tel"
-                          placeholder="50 123 4567"
-                          className={cn(
-                            "flex-1 px-4 py-3 rounded-xl bg-[#0A0A0F] border text-white placeholder-white/30 text-sm outline-none transition-colors",
-                            errors.whatsapp ? "border-red-500" : "border-white/10 focus:border-purple-500"
-                          )}
+                          inputMode="tel"
+                          autoComplete="tel-national"
+                          placeholder="Your WhatsApp number"
+                          {...register("whatsapp")}
+                          className={cn(inputBase, "min-w-0 flex-1", errors.whatsapp ? "border-[#FF3D8B]" : "border-white/10")}
                         />
                       </div>
-                      {errors.whatsapp && (
-                        <p className="text-red-400 text-xs mt-1">{errors.whatsapp.message}</p>
-                      )}
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Work Email *
-                      </label>
+                    <Field label="Email" htmlFor="lead-email" error={errors.email?.message}>
                       <input
-                        {...register("email")}
+                        id="lead-email"
                         type="email"
-                        placeholder="tariq@company.com"
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl bg-[#0A0A0F] border text-white placeholder-white/30 text-sm outline-none transition-colors",
-                          errors.email ? "border-red-500" : "border-white/10 focus:border-purple-500"
-                        )}
+                        autoComplete="email"
+                        placeholder="you@company.com"
+                        {...register("email")}
+                        className={cn(inputBase, errors.email ? "border-[#FF3D8B]" : "border-white/10")}
                       />
-                      {errors.email && (
-                        <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>
-                      )}
-                    </div>
+                    </Field>
 
-                    <div className="pt-2">
-                      <Button
-                        type="button"
-                        variant="primary"
-                        size="md"
-                        onClick={handleNextStep}
-                        className="w-full flex items-center justify-center gap-2 text-sm font-bold py-3.5"
-                      >
-                        <span>Continue to Step 2</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <Button onClick={handleNextStep} className="mt-2 w-full">
+                      Continue
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </Button>
                   </div>
                 )}
 
-                {/* STEP 2: Business & Content */}
                 {step === 2 && (
-                  <div className="space-y-4 animate-in fade-in-50 duration-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Business / Brand Name *
-                      </label>
+                  <div className="flex flex-col gap-4">
+                    <Field label="Business name" htmlFor="lead-business" error={errors.businessName?.message}>
                       <input
+                        id="lead-business"
+                        autoComplete="organization"
+                        placeholder="Your business name"
                         {...register("businessName")}
-                        placeholder="e.g. Apex Properties or Tariq Coaching"
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl bg-[#0A0A0F] border text-white placeholder-white/30 text-sm outline-none transition-colors",
-                          errors.businessName ? "border-red-500" : "border-white/10 focus:border-purple-500"
-                        )}
+                        className={cn(inputBase, errors.businessName ? "border-[#FF3D8B]" : "border-white/10")}
                       />
-                      {errors.businessName && (
-                        <p className="text-red-400 text-xs mt-1">{errors.businessName.message}</p>
-                      )}
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Your Industry *
-                      </label>
-                      <select
+                    <Field label="Industry" htmlFor="lead-industry" error={errors.industry?.message}>
+                      <Select
+                        id="lead-industry"
+                        placeholder="Select your industry"
+                        options={INDUSTRIES}
+                        defaultValue=""
+                        invalid={!!errors.industry}
                         {...register("industry")}
-                        className="w-full px-4 py-3 rounded-xl bg-[#0A0A0F] border border-white/10 text-white text-xs sm:text-sm outline-none cursor-pointer"
-                      >
-                        <option value="Real estate">Real estate &amp; High-Ticket Brokerage</option>
-                        <option value="Personal brand / Coach">Personal Brand, Coach, or Founder</option>
-                        <option value="Course creators">Course Creator / Education</option>
-                        <option value="E-commerce">E-commerce / D2C Brand</option>
-                        <option value="Agency / B2B">Marketing Agency / B2B Services</option>
-                        <option value="AI / Tech">AI / Tech / SaaS Founder</option>
-                        <option value="Other">Other Category</option>
-                      </select>
-                    </div>
+                      />
+                    </Field>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                          Videos / Month
-                        </label>
-                        <select
-                          {...register("monthlyVideos")}
-                          className="w-full px-3 py-3 rounded-xl bg-[#0A0A0F] border border-white/10 text-white text-xs outline-none cursor-pointer"
-                        >
-                          <option value="0–5">0–5 videos</option>
-                          <option value="5–10">5–10 videos</option>
-                          <option value="10–20">10–20 videos</option>
-                          <option value="20+">20+ videos</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                          Current Setup
-                        </label>
-                        <select
-                          {...register("currentEditor")}
-                          className="w-full px-3 py-3 rounded-xl bg-[#0A0A0F] border border-white/10 text-white text-xs outline-none cursor-pointer"
-                        >
-                          <option value="Myself">Myself (CapCut/VN)</option>
-                          <option value="Freelancer">Freelancers</option>
-                          <option value="In-house editor">In-house editor</option>
-                          <option value="Agency">Agency</option>
-                        </select>
-                      </div>
-                    </div>
+                    <Field label="Website or Instagram link" htmlFor="lead-social" optional>
+                      <input
+                        id="lead-social"
+                        placeholder="instagram.com/yourbrand"
+                        {...register("socialLink")}
+                        className={cn(inputBase, "border-white/10")}
+                      />
+                    </Field>
 
-                    <div className="flex gap-3 pt-2">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="md"
-                        onClick={() => setStep(1)}
-                        className="flex items-center justify-center gap-1.5 text-xs py-3"
-                      >
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                        <span>Back</span>
+                    <Field label="Videos you post per month" htmlFor="lead-volume" error={errors.monthlyVideos?.message}>
+                      <Select
+                        id="lead-volume"
+                        placeholder="Select a range"
+                        options={MONTHLY_VIDEOS}
+                        defaultValue=""
+                        invalid={!!errors.monthlyVideos}
+                        {...register("monthlyVideos")}
+                      />
+                    </Field>
+
+                    <Field label="How do you edit now?" htmlFor="lead-editor" error={errors.currentEditor?.message}>
+                      <Select
+                        id="lead-editor"
+                        placeholder="Select one"
+                        options={CURRENT_EDITOR}
+                        defaultValue=""
+                        invalid={!!errors.currentEditor}
+                        {...register("currentEditor")}
+                      />
+                    </Field>
+
+                    <div className="mt-2 flex gap-3">
+                      <Button variant="secondary" onClick={() => setStep(1)} className="px-5">
+                        <ArrowLeft className="h-4 w-4" aria-hidden />
+                        Back
                       </Button>
-                      <Button
-                        type="button"
-                        variant="primary"
-                        size="md"
-                        onClick={handleNextStep}
-                        className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-3"
-                      >
-                        <span>Continue to Step 3</span>
-                        <ArrowRight className="w-4 h-4" />
+                      <Button onClick={handleNextStep} className="flex-1">
+                        Continue
+                        <ArrowRight className="h-4 w-4" aria-hidden />
                       </Button>
                     </div>
                   </div>
                 )}
 
-                {/* STEP 3: Goals & Budget */}
                 {step === 3 && (
-                  <div className="space-y-4 animate-in fade-in-50 duration-200">
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Biggest Content Challenge (Optional)
-                      </label>
+                  <div className="flex flex-col gap-4">
+                    <Field label="Biggest content challenge" htmlFor="lead-challenge" optional>
                       <textarea
+                        id="lead-challenge"
+                        rows={3}
+                        placeholder="What's the hardest part of posting consistently?"
                         {...register("contentChallenge")}
-                        rows={2}
-                        placeholder="e.g. Inconsistent delivery, spending 10 hours a week editing, or low watch time..."
-                        className="w-full px-4 py-2.5 rounded-xl bg-[#0A0A0F] border border-white/10 focus:border-purple-500 text-white placeholder-white/30 text-xs sm:text-sm outline-none transition-colors"
+                        className={cn(inputBase, "resize-none border-white/10")}
                       />
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Monthly Video Production Budget *
-                      </label>
-                      <select
+                    <Field label="Monthly content budget" htmlFor="lead-budget" error={errors.budgetRange?.message}>
+                      <Select
+                        id="lead-budget"
+                        placeholder="Select a budget range"
+                        options={BUDGETS}
+                        defaultValue=""
+                        invalid={!!errors.budgetRange}
                         {...register("budgetRange")}
-                        className="w-full px-4 py-3 rounded-xl bg-[#0A0A0F] border border-white/10 focus:border-purple-500 text-white text-xs sm:text-sm outline-none cursor-pointer"
-                      >
-                        <option value="Under $500">Under $500 / month (Sample edit only)</option>
-                        <option value="$500–$1,000">$500–$1,000 / month (Growth Plan fit)</option>
-                        <option value="$1,000–$2,000">$1,000–$2,000 / month (Authority Plan fit)</option>
-                        <option value="$2,000+">$2,000+ / month (Custom / Multi-channel)</option>
-                      </select>
-                    </div>
+                      />
+                    </Field>
 
-                    <div>
-                      <label className="block text-xs font-semibold text-white uppercase tracking-wider mb-1.5">
-                        Preferred Starting Plan
-                      </label>
-                      <div className="grid grid-cols-3 gap-2 text-xs">
-                        {["Growth", "Authority", "Not sure"].map((p) => (
-                          <button
-                            type="button"
-                            key={p}
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            onClick={() => setValue("preferredPlan", p as any)}
-                            className={cn(
-                              "py-2 px-2.5 rounded-xl border text-center transition-all cursor-pointer",
-                              formValues.preferredPlan === p
-                                ? "bg-purple-900/40 border-purple-500 text-white font-bold"
-                                : "bg-[#0A0A0F] border-white/10 text-[#A0A0B0] hover:text-white"
-                            )}
-                          >
-                            {p}
-                          </button>
-                        ))}
+                    <fieldset>
+                      <legend className="type-small mb-1.5 block font-semibold text-white">Preferred plan</legend>
+                      <div className="grid grid-cols-3 gap-2">
+                        {PLANS.map((p) => {
+                          const selected = formValues.preferredPlan === p;
+                          return (
+                            <button
+                              key={p}
+                              type="button"
+                              role="radio"
+                              aria-checked={selected}
+                              onClick={() => setValue("preferredPlan", p, { shouldValidate: true })}
+                              className={cn(
+                                "type-small h-11 cursor-pointer rounded-xl border px-2 font-semibold transition-colors",
+                                selected
+                                  ? "border-[#A24BFF] bg-[#A24BFF]/15 text-white"
+                                  : "border-white/10 bg-[#0A0A0F] text-[#A0A0B0] hover:text-white"
+                              )}
+                            >
+                              {p}
+                            </button>
+                          );
+                        })}
                       </div>
-                    </div>
+                      {errors.preferredPlan && (
+                        <p role="alert" className="mt-1.5 text-[13px] text-[#FF3D8B]">
+                          {errors.preferredPlan.message}
+                        </p>
+                      )}
+                    </fieldset>
 
-                    <div className="flex gap-3 pt-2">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="md"
-                        onClick={() => setStep(2)}
-                        className="flex items-center justify-center gap-1.5 text-xs py-3"
-                      >
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                        <span>Back</span>
+                    {submitError && (
+                      <p role="alert" className="type-small rounded-xl border border-[#FF3D8B]/40 bg-[#FF3D8B]/10 p-3 text-white">
+                        {submitError}
+                      </p>
+                    )}
+
+                    <div className="mt-2 flex gap-3">
+                      <Button variant="secondary" onClick={() => setStep(2)} className="px-5">
+                        <ArrowLeft className="h-4 w-4" aria-hidden />
+                        Back
                       </Button>
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        size="md"
-                        disabled={isSubmitting}
-                        className="flex-1 flex items-center justify-center gap-2 text-sm font-bold py-3"
-                      >
-                        <Send className="w-4 h-4" />
-                        <span>{isSubmitting ? "Processing..." : "Submit & Schedule Call"}</span>
+                      <Button type="submit" disabled={isSubmitting} className="flex-1">
+                        <Send className="h-4 w-4" aria-hidden />
+                        {isSubmitting ? "Sending…" : "Book my audit"}
                       </Button>
                     </div>
                   </div>
                 )}
               </form>
 
-              {/* Secondary link for free sample edit */}
-              <div className="mt-6 pt-4 border-t border-white/10 text-center">
-                <a
-                  href={`https://wa.me/${site.links.whatsapp}?text=${encodeURIComponent("Hi Host Editify, I'd like to request a free sample edit.")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-[#1EC8FF] hover:underline inline-flex items-center gap-1"
-                >
-                  <span>Just want to see what we can do? Request your free sample edit →</span>
-                </a>
-              </div>
-            </div>
-          ) : submissionResult.qualified ? (
-            /* QUALIFIED PATH: Cal.com Calendar Embed */
-            <div className="animate-in zoom-in-95 duration-300">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10 pr-8">
-                <div>
-                  <span className="text-xs text-[#1EC8FF] uppercase tracking-wider block font-semibold">
-                    Audit Call Unlocked
-                  </span>
-                  <h3 className="text-lg sm:text-xl font-bold text-white">
-                    Select Your 30-Minute Google Meet Slot
-                  </h3>
+              {sampleEditHref && (
+                <div className="mt-6 border-t border-white/10 pt-5 text-center">
+                  <a
+                    href={sampleEditHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="type-small font-medium text-[#A24BFF] hover:underline"
+                  >
+                    Just want to see what we can do? Request a free sample edit →
+                  </a>
                 </div>
-                <div className="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                  <Calendar className="w-4 h-4" />
+              )}
+            </>
+          ) : result.qualified ? (
+            <div>
+              <div className="mb-4 flex items-center gap-3 border-b border-white/10 pr-10 pb-4">
+                <div className="icon-tile">
+                  <Calendar className="h-6 w-6 text-[#A24BFF]" strokeWidth={1.75} aria-hidden />
                 </div>
+                <h3 id="audit-modal-title" className="type-h3 text-white">
+                  Pick a time for your {site.callMinutes}-minute Google Meet
+                </h3>
               </div>
-
-              <div className="w-full min-h-[500px] rounded-2xl overflow-hidden bg-[#0A0A0F]">
+              <div className="min-h-[500px] w-full overflow-hidden rounded-[20px] bg-[#0A0A0F]">
                 <Cal
                   calLink={site.links.calcom}
                   style={{ width: "100%", height: "100%", minHeight: "500px", overflow: "scroll" }}
                   config={{
-                    name: submissionResult.data.name,
-                    email: submissionResult.data.email,
-                    notes: `Industry: ${submissionResult.data.industry} | Current Setup: ${submissionResult.data.currentEditor} | Budget: ${submissionResult.data.budgetRange}`,
+                    name: result.data.name,
+                    email: result.data.email,
+                    notes: `Industry: ${result.data.industry} | Editing now: ${result.data.currentEditor} | Budget: ${result.data.budgetRange}`,
                     theme: "dark",
                   }}
                 />
               </div>
             </div>
           ) : (
-            /* UNQUALIFIED PATH: Respectful Sample Edit Alternative */
-            <div className="text-center animate-in zoom-in-95 duration-300 py-4">
-              <div className="w-12 h-12 rounded-full bg-brand-gradient mx-auto flex items-center justify-center text-white mb-3 shadow-lg">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-                Let&apos;s Start With a Free Sample Edit
-              </h3>
-              <p className="text-xs sm:text-sm text-[#A0A0B0] max-w-md mx-auto leading-relaxed mb-5">
-                Thank you, <strong className="text-white font-semibold">{submissionResult.data.name}</strong>. Because your current content budget is under $500, we recommend trying our 24-hour editing workflow with one free video (up to 40 seconds) first.
-              </p>
-
-              <div className="p-4 rounded-2xl bg-[#0A0A0F] border border-white/10 text-left space-y-2.5 mb-6 max-w-md mx-auto">
-                <span className="text-xs uppercase tracking-wider text-[#1EC8FF] block font-semibold">
-                  How to Claim Your Sample Edit:
-                </span>
-                <div className="flex items-center gap-2 text-xs text-white/90">
-                  <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
-                  <span>Upload one raw clip (up to 40s) to Google Drive or WeTransfer</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-white/90">
-                  <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
-                  <span>Send the link directly to our WhatsApp</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-white/90">
-                  <span className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
-                  <span>Receive your fully graded, captioned video back in 24 hours</span>
-                </div>
-              </div>
-
-              <a
-                href={`https://wa.me/${site.links.whatsapp}?text=${encodeURIComponent(
-                  `Hi Host Editify, I'm ${submissionResult.data.name} from ${submissionResult.data.businessName}. I just submitted the form and would like to claim my free 40-second sample edit.`
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs sm:text-sm shadow-xl hover:scale-105 transition-all"
-              >
-                <MessageCircle className="w-4 h-4 fill-white stroke-none" />
-                <span>Send Clip on WhatsApp</span>
-              </a>
-            </div>
+            <UnqualifiedPath name={result.data.name} businessName={result.data.businessName} />
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function UnqualifiedPath({ name, businessName }: { name: string; businessName: string }) {
+  const href = whatsappLink(
+    `Hi Host Editify, I'm ${name} from ${businessName}. I'd like to claim my free ${site.freeFirstVideoMaxSeconds}-second sample edit.`
+  );
+  const steps = [
+    `Upload one raw clip (up to ${site.freeFirstVideoMaxSeconds}s) to Google Drive or WeTransfer`,
+    href ? "Send us the link on WhatsApp" : `Email the link to ${site.links.email}`,
+    `Get your edited, captioned video back in ${site.deliveryHours} hours`,
+  ];
+
+  return (
+    <div className="py-2 text-center">
+      <div className="icon-tile mx-auto">
+        <Sparkles className="h-6 w-6 text-[#A24BFF]" strokeWidth={1.75} aria-hidden />
+      </div>
+      <h3 id="audit-modal-title" className="type-h3 mt-4 text-white">
+        Let&apos;s start with a free sample edit
+      </h3>
+      <p className="type-small text-muted mx-auto mt-2 max-w-md">
+        Thanks, {name}. For budgets under $500 we recommend starting with one free video (up to{" "}
+        {site.freeFirstVideoMaxSeconds} seconds) first.
+      </p>
+      <ol className="card mx-auto mt-6 flex max-w-md flex-col gap-3 !p-5 text-left">
+        {steps.map((s, i) => (
+          <li key={s} className="type-small flex items-start gap-3 text-white/90">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold">
+              {i + 1}
+            </span>
+            <span>{s}</span>
+          </li>
+        ))}
+      </ol>
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 inline-flex h-[52px] items-center justify-center gap-2 rounded-full bg-[#25D366] px-7 text-[15px] font-semibold whitespace-nowrap text-white transition-transform hover:-translate-y-px"
+        >
+          <WhatsAppIcon className="h-5 w-5" />
+          Send clip on WhatsApp
+        </a>
+      ) : (
+        <a
+          href={`mailto:${site.links.email}?subject=${encodeURIComponent(`Free sample edit — ${businessName}`)}`}
+          className="bg-brand-gradient mt-6 inline-flex h-[52px] items-center justify-center rounded-full px-7 text-[15px] font-semibold whitespace-nowrap text-white"
+        >
+          Email your clip link
+        </a>
+      )}
     </div>
   );
 }

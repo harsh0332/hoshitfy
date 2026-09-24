@@ -28,28 +28,17 @@ Copy `.env.example` to `.env.local`:
 cp .env.example .env.local
 ```
 
-Populate the required credentials:
-```ini
-# Cal.com booking link (e.g. your-username/content-audit)
-NEXT_PUBLIC_CALCOM_LINK="hosteditify/content-audit"
+#### Environment variables to set in Vercel (Project → Settings → Environment Variables)
 
-# Direct communication channels
-NEXT_PUBLIC_WHATSAPP_NUMBER="971500000000"
-NEXT_PUBLIC_CONTACT_EMAIL="contact@hosteditify.com"
-
-# Social links
-NEXT_PUBLIC_INSTAGRAM_URL="https://instagram.com/hosteditify"
-NEXT_PUBLIC_LINKEDIN_URL="https://linkedin.com/company/hosteditify"
-NEXT_PUBLIC_PORTFOLIO_URL="https://canva.com"
-
-# Meta Ads tracking (Pixel + Conversions API)
-NEXT_PUBLIC_META_PIXEL_ID=""
-META_CAPI_TOKEN=""
-META_TEST_EVENT_CODE=""
-
-# Webhook for CRM / Lead routing (n8n / Zapier)
-N8N_LEAD_WEBHOOK_URL=""
-```
+| Variable | Required | What it does |
+| --- | --- | --- |
+| `N8N_LEAD_WEBHOOK_URL` | **Yes** | Every form submission is POSTed here as JSON. If empty, leads are only written to the server log (Vercel logs) and, locally, to `.leads/leads.ndjson`. If the webhook fails, the visitor sees an error and the lead is still logged. |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | **Yes** | WhatsApp number, digits only in international format (e.g. `9198XXXXXXXX`). If empty, every WhatsApp button and link is hidden. |
+| `NEXT_PUBLIC_CALCOM_LINK` | **Yes** | Cal.com `username/event` where qualified leads (budget $500+) book the call. |
+| `NEXT_PUBLIC_META_PIXEL_ID` | For ads | Meta Pixel in the browser (skipped when empty). |
+| `META_CAPI_TOKEN` | For ads | Meta Conversions API token, server side (skipped when empty). |
+| `META_TEST_EVENT_CODE` | Optional | Only while testing events in Meta Events Manager. |
+| `NEXT_PUBLIC_CONTACT_EMAIL`, `NEXT_PUBLIC_INSTAGRAM_URL`, `NEXT_PUBLIC_LINKEDIN_URL` | Optional | Contact and social links (defaults in `src/lib/site.config.ts`). |
 
 ### 3. Run Development Server
 ```bash
