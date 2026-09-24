@@ -36,7 +36,7 @@ export const site = {
       name: "Growth",
       audience: "For founders starting to post consistently",
       features: [
-        "15 short-form videos / month",
+        "15 short-form videos a\u00A0month",
         "AI avatar videos",
         "UGC videos",
         "AI ad videos",
@@ -55,7 +55,7 @@ export const site = {
       audience: "For brands scaling content across platforms",
       features: [
         "Everything in Growth, plus:",
-        "25 short-form + 4 long-form videos / month",
+        "25 short-form + 4 long-form videos a\u00A0month",
         "Advanced motion graphics",
         "Premium captions",
         "Thumbnail design",

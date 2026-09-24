@@ -11,14 +11,14 @@ import { cn } from "@/lib/utils";
 
 // Source: copy doc §6
 const deliverables = [
-  "15–30 short-form videos a month (Reels & YouTube Shorts)",
+  "15–30 short-form videos a month (Reels &\u00A0YouTube\u00A0Shorts)",
   "Long-form YouTube edits (Authority plan)",
   "Dynamic captions, with English or Arabic subtitles",
   "Motion graphics and sound design",
   "Stock and AI-generated B-roll where your footage needs it",
   "Reel covers and thumbnails",
   "A dedicated editor who learns your brand",
-  `${site.revisions.growth} revision rounds per video (${site.revisions.authority} on Authority)`,
+  `${site.revisions.growth} revision rounds per video (${site.revisions.authority}\u00A0on\u00A0Authority)`,
   "Weekly project call on Google Meet + WhatsApp updates",
   "NDA and encrypted file handling",
 ];
