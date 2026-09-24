@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronDown, HelpCircle } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { site } from "@/lib/site.config";
 
@@ -15,20 +15,24 @@ const faqs = [
     a: "Most people know how to trim clips in CapCut or VN. You are not paying for editing software; you are paying for reliable weekly delivery, immaculate visual authority, and the hours you get back to close high-ticket clients.",
   },
   {
-    q: "You're not in Dubai. How do we work together?",
-    a: "Our core production team is based in India and operates directly on Dubai hours (GST, UTC+4). You drop raw files in a shared Google Drive folder, get immediate updates on WhatsApp, and meet us weekly on Google Meet. Being remote is exactly why we deliver within 21 hours at exceptional efficiency.",
+    q: "How does remote coordination work across India and Dubai?",
+    a: "Our core production team is based in India and operates directly across Indian (IST) and Dubai (GST) business hours. You drop raw files in a shared Google Drive folder, get immediate updates on WhatsApp, and meet us weekly on Google Meet. Being remote is exactly why we deliver within 24 hours at exceptional efficiency.",
   },
   {
-    q: "What does 21 hours mean exactly?",
+    q: "What does 24 hours mean exactly?",
     a: site.deliveryFinePrint,
   },
   {
-    q: "Do you do Arabic subtitles?",
-    a: "Yes. While our primary team communicates and edits in English, we provide accurate Arabic subtitles and captions for Dubai real estate walkthroughs and regional campaigns upon request.",
+    q: "What don't you do?",
+    a: "We specialize strictly in high-retention short-form video editing for founders, coaches, and brands. We do NOT film on-site or provide camera crews (we edit the raw footage you shoot on your phone), we do NOT do weddings or social event videos, we do NOT shoot corporate documentaries, and we do NOT create heavy 3D CGI or character VFX. Staying 100% focused on short-form editing is why our 24-hour delivery turnaround never slips.",
+  },
+  {
+    q: "Do you do multi-language subtitles?",
+    a: "Yes. While our primary team communicates and edits in English, we provide accurate subtitles and captions in English, Hindi, and Arabic upon request.",
   },
   {
     q: "Which time zone do you work in?",
-    a: "We work on Dubai GST (Gulf Standard Time, UTC+4), Monday through Friday. Your dedicated editor is online and responsive during your active business day.",
+    a: "We operate across Indian IST (UTC+5:30) and Dubai GST (UTC+4), Monday through Friday. Your dedicated editor is online and responsive during your active business day.",
   },
   {
     q: "I already have an editor.",
@@ -40,7 +44,7 @@ const faqs = [
   },
   {
     q: "It looks expensive.",
-    a: "Compare it to losing 8–15 hours of your highest-value sales time every week, or to the AED 10,000+/month required to hire, visa-sponsor, insure, and manage an in-house editor in Dubai. On your free audit call, we will break down the exact ROI numbers for your business.",
+    a: "Compare it to losing 8–15 hours of your highest-value sales time every week, or the heavy monthly expense of recruiting, training, and managing a full-time in-house editor. On your free audit call, we will break down the exact ROI numbers for your business.",
   },
   ...(site.priceLockPromise
     ? [
@@ -56,7 +60,7 @@ const faqs = [
   },
   {
     q: "I need to think about it.",
-    a: "That is completely fine. Start with the free audit and free sample edit. There is zero financial commitment or risk until you have experienced the 21-hour turnaround firsthand.",
+    a: "That is completely fine. Start with the free audit and free sample edit. There is zero financial commitment or risk until you have experienced the 24-hour turnaround firsthand.",
   },
 ];
 
@@ -67,7 +71,6 @@ export function FaqSection() {
     setOpenIdx(openIdx === idx ? null : idx);
   };
 
-  // Structured Data for Google Rich Results
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -82,32 +85,25 @@ export function FaqSection() {
   };
 
   return (
-    <section id="faq-section" className="relative py-20 md:py-32 bg-[#14141C] border-y border-white/5 overflow-hidden">
-      {/* Inject FAQPage JSON-LD */}
+    <section id="faq-section" className="relative py-20 md:py-28 bg-[#14141C] border-y border-white/[0.06] overflow-hidden">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <span className="px-3.5 py-1 rounded-full text-xs font-mono uppercase tracking-widest bg-cyan-500/10 text-[#1EC8FF] border border-cyan-500/30 flex items-center gap-1.5">
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>Frequently Asked Questions</span>
-            </span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            Answers before you ask.
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
+        {/* Section Header: Pure white heading, no pill, subline */}
+        <div className="text-center max-w-[720px] mx-auto mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
+            Frequently asked questions
           </h2>
-          <p className="text-base text-[#A0A0B0]">
+          <p className="text-sm sm:text-base text-[#A0A0B0] max-w-[680px] mx-auto">
             Everything you need to know about turnaround times, remote coordination, and file ownership.
           </p>
         </div>
 
-        {/* Accordion Stack */}
-        <div className="space-y-3.5">
+        {/* Accordion Stack: max-w-[760px] */}
+        <div className="max-w-[760px] mx-auto space-y-3">
           {faqs.map((item, idx) => {
             const isOpen = openIdx === idx;
             return (
@@ -116,8 +112,8 @@ export function FaqSection() {
                 className={cn(
                   "rounded-2xl border transition-all duration-200 overflow-hidden",
                   isOpen
-                    ? "bg-[#0A0A0F] border-purple-500/40 shadow-lg"
-                    : "bg-[#0A0A0F]/60 border-white/10 hover:border-white/20"
+                    ? "bg-[#0A0A0F] border-[#A24BFF]/40 shadow-lg"
+                    : "bg-[#0A0A0F]/60 border-white/[0.08] hover:border-white/20"
                 )}
               >
                 <button
@@ -128,21 +124,23 @@ export function FaqSection() {
                   <span className="text-base sm:text-lg font-bold text-white leading-snug">
                     {item.q}
                   </span>
-                  <div
-                    className={cn(
-                      "w-8 h-8 rounded-full bg-[#14141C] flex items-center justify-center text-white shrink-0 transition-transform duration-300 border border-white/10",
-                      isOpen ? "rotate-180 text-[#1EC8FF] border-[#1EC8FF]/40" : ""
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center shrink-0 border border-white/[0.08]">
+                    {isOpen ? (
+                      <Minus className="w-4 h-4 text-[#A24BFF]" strokeWidth={2} />
+                    ) : (
+                      <Plus className="w-4 h-4 text-white/70" strokeWidth={2} />
                     )}
-                  >
-                    <ChevronDown className="w-4 h-4" />
                   </div>
                 </button>
 
-                {isOpen && (
-                  <div className="px-5 pb-6 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base text-[#A0A0B0] leading-relaxed border-t border-white/5 mt-1 animate-in fade-in-50 duration-200">
-                    {item.a}
-                  </div>
-                )}
+                <div
+                  className={cn(
+                    "faq-answer px-5 pb-6 sm:px-6 sm:pb-6 pt-0 text-sm sm:text-base text-[#A0A0B0] leading-relaxed border-t border-white/[0.06] mt-1 font-normal",
+                    !isOpen && "hidden"
+                  )}
+                >
+                  {item.a}
+                </div>
               </div>
             );
           })}

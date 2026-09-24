@@ -6,13 +6,7 @@ export const leadSchema = z.object({
   whatsapp: z.string().min(8, "Valid phone number is required"),
   email: z.string().email("Valid email address is required"),
   businessName: z.string().min(1, "Business name is required"),
-  industry: z.enum([
-    "Real estate",
-    "Coach or consultant",
-    "Course creator",
-    "E-commerce",
-    "Other",
-  ]),
+  industry: z.string().min(1, "Industry is required"),
   socialLink: z.string().optional(),
   monthlyVideos: z.enum(["0–5", "5–10", "10–20", "20+"]),
   currentEditor: z.enum([

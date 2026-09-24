@@ -53,11 +53,29 @@ export function trackPixelEvent(
   }
 }
 
-// Custom CTA click tracking with position metadata
-export function trackCtaClick(position: CtaPosition, label: string) {
-  trackPixelEvent("CustomCtaClick", {
+// Safely execute custom fbq in browser
+export function trackCustomPixelEvent(
+  eventName: string,
+  params: Record<string, unknown> = {}
+) {
+  if (typeof window !== "undefined" && typeof window.fbq === "function") {
+    window.fbq("trackCustom", eventName, params);
+  }
+}
+
+// Custom CTA click tracking with position metadata (Phase 5: CTA_Click)
+export function trackCtaClick(position: string, label: string = "Book My Free Content Audit") {
+  trackCustomPixelEvent("CTA_Click", {
     position,
     label,
+    timestamp: new Date().toISOString(),
+  });
+}
+
+// Form popup open tracking (Phase 5: FormOpen)
+export function trackFormOpen(position: string = "unknown") {
+  trackCustomPixelEvent("FormOpen", {
+    position,
     timestamp: new Date().toISOString(),
   });
 }

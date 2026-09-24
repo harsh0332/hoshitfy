@@ -5,13 +5,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { useAuditModal } from "@/context/AuditModalContext";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const { openAuditModal } = useAuditModal();
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 80);
+      setScrolled(window.scrollY > 40);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -29,45 +31,46 @@ export function Navbar() {
       className={cn(
         "sticky top-0 z-40 w-full transition-all duration-300",
         scrolled
-          ? "py-3 bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-          : "py-5 bg-transparent"
+          ? "py-2.5 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.6)]"
+          : "py-3.5 bg-[#0A0A0F]/80 backdrop-blur-md border-b border-white/[0.05]"
       )}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
-        {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-md group-hover:scale-105 transition-transform">
-            <Image
-              src="/brand/logo.png"
-              alt="Host Editify"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-base sm:text-lg tracking-tight text-white leading-none">
-              HOST<span className="text-brand-gradient">EDITIFY</span>
-            </span>
-            <span className="text-[10px] text-[#A0A0B0] font-medium tracking-wider uppercase mt-0.5">
-              You shoot, We deliver
-            </span>
-          </div>
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-8 flex items-center justify-between">
+        {/* Brand Logo: Clean transparent logo (42px height, auto width) */}
+        <Link href="/" className="flex items-center group">
+          <img
+            src="/brand/logo-transparent.png"
+            alt="Host Editify"
+            style={{ height: "42px", width: "auto", objectFit: "contain", display: "block" }}
+            className="transition-transform duration-200 group-hover:scale-105"
+          />
         </Link>
 
-        {/* Minimal Navigation Anchors (No outbound links on ad page) */}
-        <nav aria-label="Main Navigation" className="hidden md:flex items-center gap-8 text-sm font-medium text-[#A0A0B0]">
+        {/* Navigation Anchors */}
+        <nav aria-label="Main Navigation" className="hidden lg:flex items-center gap-7 text-sm font-medium text-[#A0A0B0]">
           <button
             onClick={() => scrollToSection("work-section")}
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Work
+            Watch our work
+          </button>
+          <button
+            onClick={() => scrollToSection("why-us-section")}
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            Why us
           </button>
           <button
             onClick={() => scrollToSection("process-section")}
             className="hover:text-white transition-colors cursor-pointer"
           >
-            Process
+            How it works
+          </button>
+          <button
+            onClick={() => scrollToSection("plans-section")}
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            Plans
           </button>
           <button
             onClick={() => scrollToSection("faq-section")}
@@ -83,10 +86,10 @@ export function Navbar() {
             variant="primary"
             size="sm"
             ctaPosition="nav"
-            onClick={() => scrollToSection("booking-section")}
-            className="text-xs sm:text-sm font-semibold"
+            onClick={() => openAuditModal("nav")}
+            className="text-xs sm:text-sm font-semibold h-10 px-4 sm:px-5"
           >
-            Book Free Content Audit →
+            Book My Free Content Audit
           </Button>
         </div>
       </div>

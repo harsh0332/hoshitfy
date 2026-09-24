@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "portfolio": "node scripts/build-portfolio.mjs",
+    "reviews": "node scripts/build-reviews.mjs"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.2",

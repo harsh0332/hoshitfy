@@ -36,5 +36,6 @@ yarn-error.log*
 # Large raw media & references from inbox (prevent GitHub 100MB file limit)
 _inbox/references/
 _inbox/videos/
+.inbox/
 *.mov
 

@@ -1,13 +1,15 @@
 "use client";
 
 import React from "react";
-import { Check, Gift, Star, ArrowRight, X, ShieldAlert } from "lucide-react";
+import { Check, Gift, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { IconTile } from "@/components/ui/IconTile";
+import { site } from "@/lib/site.config";
+import { useAuditModal } from "@/context/AuditModalContext";
 
-const deliverables = [
-  "15–30 short-form videos a month (Reels, Shorts, TikTok)",
-  "Long-form YouTube edits (Authority plan)",
-  "Dynamic captions & subtitles (English or Arabic subtitles)",
+const coreDeliverables = [
+  "15–30 short-form videos a month (Reels & Shorts)",
+  "Dynamic captions & subtitles (English, Hindi, or Arabic)",
   "Custom motion graphics & professional sound design",
   "Curated AI & stock B-roll integration where footage needs it",
   "Custom reel covers & high-CTR thumbnails",
@@ -17,62 +19,62 @@ const deliverables = [
   "Strict NDA protection & encrypted file handling",
 ];
 
-const bonuses = [
-  { title: "Hook Bank", desc: "Proven, high-retention opening lines tailored for your niche." },
-  { title: "Content Calendar", desc: "A ready-to-shoot roadmap of what to film and when." },
-  { title: "Content Style Ideas", desc: "Video formats currently driving algorithmic reach in the UAE." },
-  { title: "Competitor Analysis", desc: "Breakdown of what top creators in your space are posting." },
-  { title: "Monthly Performance Report", desc: "Clear analytics review of top-performing hooks & retention." },
-  { title: "Monthly Strategy Call", desc: "1-on-1 strategy alignment to refine upcoming content topics." },
+const growthFeatures = [
+  "15 short-form videos/month",
+  "AI avatar videos",
+  "UGC videos",
+  "AI ad videos",
+  "Motion graphics",
+  "Captions & subtitles",
+  "Dedicated editor",
+  "2 revisions/video",
+  "NDA + encrypted files",
+  "Weekly project call",
+  "Email support",
 ];
 
-const whatWeDontDo = [
-  "No weddings or social events",
-  "No corporate documentary films",
-  "No videography or camera crew hire (we edit what you shoot)",
-  "No heavy 3D CGI or character VFX",
+const authorityFeatures = [
+  "Everything in Growth +",
+  "25 short-form + 4 long-form videos/month",
+  "Advanced motion graphics",
+  "Premium captions",
+  "Thumbnail design",
+  "Priority delivery",
+  "4 revisions/video",
 ];
 
 export function WhatYouGetSection() {
-  const scrollToBooking = () => {
-    const el = document.getElementById("booking-section");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
+  const { openAuditModal } = useAuditModal();
 
   return (
-    <section className="relative py-20 md:py-32 bg-[#0A0A0F] overflow-hidden">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <span className="px-3.5 py-1 rounded-full text-xs font-mono uppercase tracking-widest bg-cyan-500/10 text-[#1EC8FF] border border-cyan-500/30">
-              Complete Production Stack
-            </span>
-          </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
-            Everything you need to post like a <br className="hidden sm:inline" />
-            <span className="text-brand-gradient">full-time creator.</span>
+    <section id="plans-section" className="relative py-20 md:py-28 bg-[#0A0A0F] overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
+        {/* Section Header: Pure white heading, no pill, subline */}
+        <div className="text-center max-w-[720px] mx-auto mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight mb-3">
+            Everything you need to post like a full-time creator
           </h2>
-          <p className="text-base text-[#A0A0B0]">
-            Every inclusion is designed to free your schedule and turn unedited footage into high-converting assets.
+          <p className="text-sm sm:text-base text-[#A0A0B0] max-w-[680px] mx-auto">
+            Core monthly deliverables
           </p>
         </div>
 
-        {/* 2-Column Bento: What You Get vs Free Bonuses */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+        {/* 2-Column Bento: What You Get vs Free Hook Bank Bonus (Equal height) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-16 sm:mb-20 items-stretch max-w-5xl mx-auto">
           {/* Deliverables Column */}
-          <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-[#14141C] border border-white/10 shadow-xl flex flex-col justify-between">
+          <div className="lg:col-span-7 p-6 sm:p-8 rounded-2xl bg-[#14141C] border border-white/[0.08] shadow-xl flex flex-col justify-between">
             <div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <span>Core Monthly Deliverables</span>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
+                Monthly deliverables
               </h3>
               <div className="space-y-3.5">
-                {deliverables.map((item, idx) => (
+                {coreDeliverables.map((item, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <div className="w-5 h-5 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center shrink-0 mt-0.5">
-                      <Check className="w-3.5 h-3.5" />
+                    <div className="w-5 h-5 rounded-full bg-white/[0.06] border border-white/[0.08] flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-3.5 h-3.5 text-[#A24BFF]" />
                     </div>
-                    <span className="text-sm sm:text-base text-[#FFFFFF] font-medium leading-snug">
+                    {/* Weight 600, not heavy bold */}
+                    <span className="text-sm sm:text-base text-white/90 font-semibold leading-snug">
                       {item}
                     </span>
                   </div>
@@ -80,185 +82,163 @@ export function WhatYouGetSection() {
               </div>
             </div>
 
-            {/* Platform Icons Row */}
-            <div className="pt-6 mt-8 border-t border-white/10">
-              <span className="text-xs uppercase font-mono tracking-wider text-[#A0A0B0] block mb-3">
+            {/* Platform Formats Row (No TikTok) */}
+            <div className="pt-6 mt-8 border-t border-white/[0.08]">
+              <span className="text-xs uppercase tracking-wider text-[#A0A0B0] block mb-3 font-medium">
                 Optimized Formats for:
               </span>
-              <div className="flex items-center gap-4 text-xs font-semibold text-white/80 flex-wrap">
-                <span className="px-3 py-1 rounded-md bg-[#0A0A0F] border border-white/10">Instagram Reels</span>
-                <span className="px-3 py-1 rounded-md bg-[#0A0A0F] border border-white/10">YouTube Shorts &amp; Long-Form</span>
-                <span className="px-3 py-1 rounded-md bg-[#0A0A0F] border border-white/10">TikTok</span>
-                <span className="px-3 py-1 rounded-md bg-[#0A0A0F] border border-white/10">LinkedIn</span>
-                <span className="px-3 py-1 rounded-md bg-[#0A0A0F] border border-white/10">Meta Ads</span>
+              <div className="flex items-center gap-2 sm:gap-2.5 text-xs font-semibold text-white/80 flex-wrap">
+                <span className="px-3 py-1.5 rounded-lg bg-[#0A0A0F] border border-white/[0.08]">Instagram Reels</span>
+                <span className="px-3 py-1.5 rounded-lg bg-[#0A0A0F] border border-white/[0.08]">YouTube Shorts</span>
+                <span className="px-3 py-1.5 rounded-lg bg-[#0A0A0F] border border-white/[0.08]">LinkedIn</span>
+                <span className="px-3 py-1.5 rounded-lg bg-[#0A0A0F] border border-white/[0.08]">Meta Ads</span>
               </div>
             </div>
           </div>
 
-          {/* Free Bonuses Column */}
-          <div className="lg:col-span-5 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#1E1428] via-[#14141C] to-[#14141C] border border-purple-500/40 shadow-xl flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-36 h-36 bg-pink-500/10 rounded-full blur-3xl pointer-events-none" />
-
+          {/* Hook Bank: Strong Single Bonus Card */}
+          <div className="lg:col-span-5 p-6 sm:p-8 rounded-2xl bg-[#14141C] border border-white/[0.08] shadow-xl flex flex-col justify-between relative overflow-hidden">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-500/20 text-[#FF3D8B] text-xs font-bold tracking-wider uppercase mb-4 border border-pink-500/30">
-                <Gift className="w-3.5 h-3.5" />
-                <span>Included Free With Every Plan</span>
+              <div className="flex items-center gap-3 mb-5">
+                <IconTile icon={Gift} size={22} color="purple" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A24BFF]">
+                  Included Free Bonus
+                </span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">
-                Strategic Growth Assets
-              </h3>
 
-              <div className="space-y-4">
-                {bonuses.map((b, idx) => (
-                  <div key={idx} className="p-3.5 rounded-xl bg-[#0A0A0F]/60 border border-white/5">
-                    <h4 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                      <span className="text-[#FF8A1E]">★</span>
-                      <span>{b.title}</span>
-                    </h4>
-                    <p className="text-xs text-[#A0A0B0] leading-relaxed">{b.desc}</p>
-                  </div>
-                ))}
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                The Hook Bank
+              </h3>
+              <p className="text-xs sm:text-sm text-[#A0A0B0] leading-relaxed mb-6">
+                100+ proven, high-retention opening lines tailored for your specific industry. We research and write your custom hook bank before your first batch is filmed so your videos stop the scroll in the first 2 seconds.
+              </p>
+
+              <div className="p-4 rounded-xl bg-[#0A0A0F] border border-white/[0.06] space-y-3">
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-white/90 font-medium">
+                  <span className="text-[#A24BFF]">•</span>
+                  <span>Category-specific pattern interrupts</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-white/90 font-medium">
+                  <span className="text-[#A24BFF]">•</span>
+                  <span>Tested across top formats in India &amp; Dubai</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm text-white/90 font-medium">
+                  <span className="text-[#A24BFF]">•</span>
+                  <span>Continuously updated every month</span>
+                </div>
               </div>
+
+              {/* Optional Config Toggles */}
+              {site.bonuses.contentStyleIdeas && (
+                <div className="mt-4 p-3.5 rounded-xl bg-[#0A0A0F] border border-white/[0.06]">
+                  <h4 className="text-sm font-bold text-white mb-1">Content Style Ideas</h4>
+                  <p className="text-xs text-[#A0A0B0]">Video formats currently driving algorithmic reach.</p>
+                </div>
+              )}
+              {site.bonuses.monthlyStrategyCall && (
+                <div className="mt-3 p-3.5 rounded-xl bg-[#0A0A0F] border border-white/[0.06]">
+                  <h4 className="text-sm font-bold text-white mb-1">Monthly Strategy Call</h4>
+                  <p className="text-xs text-[#A0A0B0]">1-on-1 strategy alignment to refine content topics.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-white/[0.08]">
+              <span className="text-xs font-semibold text-white/70 flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-[#A24BFF]" />
+                <span>Zero extra charge · Lifetime client access</span>
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Plan Cards (Growth vs Authority) */}
-        <div className="mb-16">
-          <div className="text-center mb-8">
-            <h3 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-              Choose Your Production Capacity
+        {/* Plan Cards: Growth vs Authority (Equal Size and Visual Weight, No Prices) */}
+        <div>
+          {/* Subline shown ONCE here */}
+          <div className="text-center max-w-[720px] mx-auto mb-10 sm:mb-12">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
+              Choose your plan
             </h3>
             <p className="text-sm text-[#A0A0B0]">
-              Pricing is customized and shared on your 30-min audit call based on your exact footage volume.
+              Pricing shared on your free audit call.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto items-stretch">
             {/* Growth Plan Card */}
-            <div className="p-8 rounded-3xl bg-[#14141C] border border-white/10 flex flex-col justify-between shadow-lg">
+            <div className="p-7 sm:p-8 rounded-2xl bg-[#14141C] border border-white/[0.08] flex flex-col justify-between shadow-xl">
               <div>
-                <span className="text-xs uppercase font-mono tracking-widest text-[#1EC8FF] font-semibold">
-                  Plan 01
-                </span>
-                <h4 className="text-2xl font-extrabold text-white mt-1 mb-2">Growth</h4>
-                <p className="text-sm text-[#A0A0B0] mb-6">
-                  Perfect for founders &amp; solo agents aiming to establish consistent daily posting.
+                <div className="mb-2">
+                  <span className="text-xs uppercase tracking-widest text-[#A24BFF] font-semibold">
+                    Plan 01
+                  </span>
+                </div>
+                <h4 className="text-2xl sm:text-3xl font-bold text-white mb-1">Growth</h4>
+                <p className="text-xs sm:text-sm text-[#A0A0B0] font-medium mb-6">
+                  Founders starting to post consistently
                 </p>
 
                 <div className="space-y-3 mb-8">
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <strong className="text-white">15 Short-Form Videos / month</strong>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#A0A0B0]">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>2 Revisions per video</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#A0A0B0]">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>21-Hour delivery guarantee</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#A0A0B0]">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>Dedicated editor + 1 weekly project call</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-[#A0A0B0]">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>All 6 Strategic Bonuses included</span>
-                  </div>
+                  {growthFeatures.map((feat, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5 text-xs sm:text-sm text-white/90">
+                      <Check className="w-4 h-4 text-[#A24BFF] shrink-0" />
+                      <span className="font-semibold">{feat}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-white/10">
-                <span className="text-xs font-mono text-[#A0A0B0] block mb-3">
-                  Pricing tailored on your free audit call
-                </span>
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={scrollToBooking}
-                  className="w-full text-sm font-semibold"
-                >
-                  Book Growth Audit →
-                </Button>
-              </div>
-            </div>
-
-            {/* Authority Plan Card (Featured) */}
-            <div className="relative p-8 rounded-3xl bg-gradient-to-b from-[#1C162E] to-[#14141C] border-2 border-purple-500 shadow-[0_0_40px_-10px_rgba(162,75,255,0.4)] flex flex-col justify-between">
-              {/* Featured Badge */}
-              <div className="absolute -top-3.5 right-8 px-3.5 py-1 rounded-full bg-brand-gradient text-white text-xs font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-md">
-                <Star className="w-3.5 h-3.5 fill-white" />
-                <span>Most Popular in Dubai</span>
-              </div>
-
-              <div>
-                <span className="text-xs uppercase font-mono tracking-widest text-[#FF3D8B] font-semibold">
-                  Plan 02 · Full Scale
-                </span>
-                <h4 className="text-2xl font-extrabold text-white mt-1 mb-2">Authority</h4>
-                <p className="text-sm text-[#A0A0B0] mb-6">
-                  For businesses and leaders seeking complete omnipresence across short and long-form channels.
-                </p>
-
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <strong className="text-white">25 Short-Form Videos / month</strong>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white font-medium">
-                    <Check className="w-4 h-4 text-[#FF8A1E]" />
-                    <span className="text-[#FF8A1E] font-semibold">+ 4 Long-Form YouTube Edits</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>4 Revisions per video (Priority queue)</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>Advanced motion graphics &amp; thumbnail packs</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-white">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span>All 6 Strategic Bonuses included</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-white/10">
-                <span className="text-xs font-mono text-[#A0A0B0] block mb-3">
-                  Pricing tailored on your free audit call
-                </span>
+              <div className="pt-6 border-t border-white/[0.08]">
                 <Button
                   variant="primary"
                   size="md"
-                  onClick={scrollToBooking}
-                  className="w-full text-sm font-bold"
+                  onClick={() => openAuditModal("growth-plan")}
+                  className="w-full text-sm font-semibold whitespace-nowrap py-3.5"
                 >
-                  Book Authority Audit →
+                  <span>Book My Free Content Audit</span>
+                  <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Honest "What We Deliberately Don't Do" Section */}
-        <div className="p-6 md:p-8 rounded-2xl bg-[#14141C]/50 border border-white/5 max-w-3xl mx-auto">
-          <div className="flex items-center gap-2 mb-4 text-[#A0A0B0] text-xs uppercase font-mono tracking-wider">
-            <ShieldAlert className="w-4 h-4 text-[#FF8A1E]" />
-            <span>Honesty &amp; Specialization: What We Deliberately DO NOT Do</span>
-          </div>
-          <p className="text-xs sm:text-sm text-[#A0A0B0] mb-4">
-            Saying no to everything outside short-form editing is why our 21-hour turnaround never slips:
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {whatWeDontDo.map((item, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm text-[#A0A0B0]">
-                <X className="w-4 h-4 text-red-400/80 shrink-0" />
-                <span>{item}</span>
+            {/* Authority Plan Card (Equal visual weight, small Most popular tag only) */}
+            <div className="p-7 sm:p-8 rounded-2xl bg-[#14141C] border border-white/[0.08] flex flex-col justify-between shadow-xl relative">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs uppercase tracking-widest text-[#A24BFF] font-semibold">
+                    Plan 02
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/[0.08] text-white text-[11px] font-semibold tracking-wider border border-white/[0.12]">
+                    Most popular
+                  </span>
+                </div>
+                <h4 className="text-2xl sm:text-3xl font-bold text-white mb-1">Authority</h4>
+                <p className="text-xs sm:text-sm text-[#A0A0B0] font-medium mb-6">
+                  Brands scaling content across platforms
+                </p>
+
+                <div className="space-y-3 mb-8">
+                  {authorityFeatures.map((feat, idx) => (
+                    <div key={idx} className="flex items-center gap-2.5 text-xs sm:text-sm text-white/90">
+                      <Check className="w-4 h-4 text-[#A24BFF] shrink-0" />
+                      <span className="font-semibold">{feat}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+
+              <div className="pt-6 border-t border-white/[0.08]">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => openAuditModal("authority-plan")}
+                  className="w-full text-sm font-semibold whitespace-nowrap py-3.5"
+                >
+                  <span>Book My Free Content Audit</span>
+                  <ArrowRight className="w-4 h-4 ml-1.5" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

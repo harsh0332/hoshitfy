@@ -29,7 +29,7 @@ export function Button({
     const rect = buttonRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    buttonRef.current.style.transform = `translate(${x * 0.18}px, ${y * 0.18}px)`;
+    buttonRef.current.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
   };
 
   const handleMouseLeave = () => {
@@ -45,16 +45,16 @@ export function Button({
   };
 
   const sizeClasses = {
-    sm: "px-4 py-2 text-xs",
-    md: "px-6 py-3 text-sm font-semibold tracking-wide",
-    lg: "px-8 py-4 text-base font-bold tracking-wide",
+    sm: "h-10 px-4 text-xs font-semibold",
+    md: "h-[46px] sm:h-12 px-6 text-sm font-semibold tracking-wide",
+    lg: "h-[52px] sm:h-[54px] px-8 text-sm sm:text-base font-semibold tracking-wide",
   };
 
   const variantClasses = {
     primary:
-      "relative bg-brand-gradient text-white rounded-full transition-all duration-300 shadow-[0_0_24px_-4px_rgba(255,61,139,0.5)] hover:shadow-[0_0_36px_0_rgba(162,75,255,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-white/20",
+      "relative bg-brand-gradient text-white rounded-full transition-all duration-300 shadow-[0_0_24px_-4px_rgba(162,75,255,0.45)] hover:shadow-[0_0_36px_0_rgba(162,75,255,0.65)] hover:scale-[1.02] active:scale-[0.98] border border-white/20",
     secondary:
-      "bg-[#14141C] text-white hover:bg-[#1D1D28] rounded-full border border-white/10 hover:border-purple-500/40 transition-all",
+      "bg-[#14141C] text-white hover:bg-[#1D1D28] rounded-full border border-white/20 hover:border-[#A24BFF]/50 transition-all",
     outline:
       "bg-transparent text-white border border-white/20 hover:border-white/50 rounded-full transition-all",
     ghost: "bg-transparent text-[#A0A0B0] hover:text-white transition-colors",
@@ -66,8 +66,9 @@ export function Button({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
+      data-cta-position={ctaPosition}
       className={cn(
-        "inline-flex items-center justify-center cursor-pointer select-none transition-transform duration-200 ease-out",
+        "inline-flex items-center justify-center cursor-pointer select-none transition-transform duration-200 ease-out whitespace-nowrap",
         sizeClasses[size],
         variantClasses[variant],
         className

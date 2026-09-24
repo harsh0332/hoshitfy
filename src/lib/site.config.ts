@@ -1,13 +1,19 @@
 export const site = {
   brand: "Host Editify",
   tagline: "You shoot, We deliver",
-  deliveryHours: 21, // short-form, counted from footage + brief received
+  headline: "You film it. We edit it. It's ready in 24 hours.",
+  deliveryHours: 24, // short-form, counted from footage + brief received
   deliveryFinePrint:
-    "For short-form videos, counted from when your footage and brief land in your Drive folder, Mon–Fri (Dubai time).",
+    "For short-form videos, counted from when your footage and brief land in your Drive folder, Mon–Fri (GST / IST).",
   maxClientsPerMonth: 5,
   spotsLeftThisMonth: null as number | null, // set manually; bar hides when null
   freeFirstVideoMaxSeconds: 40,
   revisions: { growth: 2, authority: 4 },
+  bonuses: {
+    hookBank: true,
+    contentStyleIdeas: false,
+    monthlyStrategyCall: false,
+  },
   plans: [
     { name: "Growth", summary: "15 short-form videos / month" },
     {
@@ -17,13 +23,8 @@ export const site = {
     },
   ],
   priceLockPromise: true, // FAQ "Will the price go up?" shows only if true
-  founder: { name: "Dhanraj Singh", years: 4, clients: "100+" },
-  stats: {
-    // only verified numbers; null hides
-    adCtr: "2.5%",
-    costPerLeadUsd: null,
-    videosDelivered: null,
-  },
+  founder: { name: "Dhanraj Singh", years: 4, clients: null },
+  stats: null, // only add client-confirmed numbers; null stats must not render
   clients: [
     "Bluhawk Marketing",
     "AI Buddies",

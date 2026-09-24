@@ -19,7 +19,7 @@ const prepVideos = [
     tag: "Preparation",
   },
   {
-    title: "5 High-Converting Video Hooks for Dubai Real Estate",
+    title: "5 High-Converting Video Hooks for Founders",
     duration: "01:40",
     tag: "Strategy",
   },
@@ -43,7 +43,7 @@ export default function ThankYouPage() {
           <CheckCircle2 className="w-8 h-8" />
         </div>
 
-        <span className="text-xs uppercase font-mono tracking-widest text-[#1EC8FF] font-bold block mb-2">
+        <span className="text-xs uppercase tracking-widest text-[#1EC8FF] font-bold block mb-2">
           Call Confirmed
         </span>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
@@ -64,7 +64,7 @@ export default function ThankYouPage() {
                 Claim Your Free Edit Before the Call
               </h2>
               <span className="text-xs text-[#A0A0B0]">
-                Up to 40 seconds · Delivered in 21 hours
+                Up to 40 seconds · Delivered in 24 hours
               </span>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default function ThankYouPage() {
 
         {/* 3 Preparation Videos */}
         <div className="text-left mb-12">
-          <h3 className="text-sm uppercase font-mono tracking-wider text-white font-semibold mb-4 text-center">
+          <h3 className="text-sm uppercase tracking-wider text-white font-semibold mb-4 text-center">
             Watch Before Your Call
           </h3>
           <div className="space-y-3">
@@ -103,10 +103,10 @@ export default function ThankYouPage() {
                     <h4 className="text-sm font-semibold text-white leading-snug">
                       {video.title}
                     </h4>
-                    <span className="text-xs text-[#A0A0B0] font-mono">{video.tag}</span>
+                    <span className="text-xs text-[#A0A0B0] font-medium">{video.tag}</span>
                   </div>
                 </div>
-                <span className="text-xs font-mono text-white/50">{video.duration}</span>
+                <span className="text-xs font-medium text-white/50">{video.duration}</span>
               </div>
             ))}
           </div>
@@ -115,7 +115,7 @@ export default function ThankYouPage() {
         {/* Return Home Link */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-mono text-[#A0A0B0] hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-xs text-[#A0A0B0] hover:text-white transition-colors font-medium"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Return to Homepage</span>

@@ -15,19 +15,19 @@ export default function PrivacyPage() {
       <div className="max-w-3xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xs font-mono text-[#A0A0B0] hover:text-white transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-xs text-[#A0A0B0] hover:text-white transition-colors mb-8 font-medium"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Home</span>
         </Link>
 
-        <div className="inline-block px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[#1EC8FF] font-mono text-xs mb-3">
-          Meta Ads &amp; GCC Compliance Notice
+        <div className="inline-block px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-[#1EC8FF] text-xs mb-3 font-semibold">
+          Meta Ads &amp; Privacy Notice
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
           Privacy Policy
         </h1>
-        <p className="text-xs text-[#A0A0B0] font-mono mb-8">
+        <p className="text-xs text-[#A0A0B0] mb-8 font-medium">
           Last Updated: September 2026 · Marked for Founder Review
         </p>
 

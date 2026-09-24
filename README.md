@@ -1,18 +1,17 @@
-# Host Editify — Premium Landing Page & Booking Funnel
+# Host Editify — Landing Page & Audit Booking Funnel
 
-A high-converting, single-page, heavily animated landing page engineered for **Host Editify**, a short-form video editing agency targeting founders, real estate leaders, and creators in **Dubai** (and select Indian metros). Built for Meta ads traffic with one conversion goal: booking a qualified **30-Minute Free Content Audit Call** on Google Meet.
+A high-converting, single-page landing page and audit booking funnel engineered for **Host Editify**, a short-form video editing agency delivering publish-ready content in 24 hours for founders, coaches, and brands in **India and Dubai**.
 
 ---
 
 ## ⚡ Tech Stack
 
 - **Framework**: Next.js 15 (App Router) + React 19 + TypeScript
-- **Styling**: Tailwind CSS v4 + Custom Design System Tokens
-- **Motion & Interaction**: GSAP + ScrollTrigger, Lenis Smooth Scroll, Motion (`motion`)
-- **Forms & Validation**: React Hook Form + Zod + Libphonenumber-js
+- **Styling**: Tailwind CSS v4 + Montserrat (Headings) + Inter (Body)
+- **Forms & Popups**: React Hook Form + Zod + Libphonenumber-js + AuditModal Context (Mobile bottom-sheet, Desktop modal)
 - **Scheduling**: Cal.com Embed (`@calcom/embed-react`)
-- **Analytics & Tracking**: Meta Pixel (browser) + Meta Conversions API (server-side SHA-256 deduplicated) + Vercel Web Analytics & Speed Insights
-- **Media Pipeline**: FFmpeg automated optimization (`scripts/process-videos.sh`) + Sharp
+- **Analytics & Tracking**: Meta Pixel + Meta Conversions API (CAPI) deduplicated via event IDs + UTM parameter persistence
+- **Media Automation**: Automated portfolio and review scanner scripts (`npm run portfolio`, `npm run reviews`)
 
 ---
 
@@ -31,7 +30,7 @@ cp .env.example .env.local
 
 Populate the required credentials:
 ```ini
-# Cal.com booking link
+# Cal.com booking link (e.g. your-username/content-audit)
 NEXT_PUBLIC_CALCOM_LINK="hosteditify/content-audit"
 
 # Direct communication channels
@@ -48,7 +47,7 @@ NEXT_PUBLIC_META_PIXEL_ID=""
 META_CAPI_TOKEN=""
 META_TEST_EVENT_CODE=""
 
-# Webhook for CRM / Lead routing (n8n)
+# Webhook for CRM / Lead routing (n8n / Zapier)
 N8N_LEAD_WEBHOOK_URL=""
 ```
 
@@ -66,60 +65,60 @@ npm run start
 
 ---
 
-## 🛠️ Founder & Editor Operational Guide
+## 🛠️ Content & Media Management Guide
 
-### 1. Changing Business Facts & Monthly Limits (`src/lib/site.config.ts`)
-All numbers, guarantees, monthly caps, and external links live in a single source of truth:
+### 1. Adding Portfolio Videos
+All videos on the site appear exclusively in the **"Watch our work"** section.
+1. Place vertical 9:16 `.mp4` video files into the corresponding directory:
+   - `public/videos/work/short-form/` — Short-form Reels, Shorts, and TikTok cuts.
+   - `public/videos/work/ads/` — Direct-response and paid ads.
+   - `public/videos/work/before-after/pair-1/` — Subfolders with `raw.mp4` and `edit.mp4`.
+2. Run the automated scan script:
+   ```bash
+   npm run portfolio
+   ```
+   *This automatically generates clean posters in `public/posters/work/` and updates `src/data/portfolio.json`.*
+
+### 2. Adding Client Review Screenshots
+The "What our clients say" section is a screenshot-based review wall (swipe carousel on mobile, masonry on desktop, tap to expand full size).
+1. Drop screenshot images (`.png`, `.jpg`, `.jpeg`, `.webp`) into `public/reviews/`.
+   - Name format: `ClientName_Company.png` (e.g. `Rudra-Sahu_Bluhawk-Marketing.png`).
+   - Or add a JSON sidecar with the same name: `Rudra-Sahu.json` containing `{ "name": "Rudra Sahu", "business": "Bluhawk Marketing", "caption": "..." }`.
+2. Run the reviews builder:
+   ```bash
+   npm run reviews
+   ```
+   *If `public/reviews/` is empty, the section automatically hides from the landing page with zero fake placeholders.*
+
+### 3. Adding Client & Brand Logos
+1. Place SVGs or transparent PNGs in `public/logos/`.
+2. Add brand names to the `clients` array in `src/lib/site.config.ts`:
+   ```ts
+   clients: [
+     "Bluhawk Marketing",
+     "AI Buddies",
+     "DPM Entertainment",
+     "Heart to Mind",
+     "Host Dhanraj",
+   ],
+   ```
+
+### 4. Founder Photo & Story
+- Replace `public/founder/dhanraj-singh.jpg` with Dhanraj's official high-resolution headshot.
+- Edit bio text or details in `src/components/sections/FounderSection.tsx` (keep under 60 words).
+
+### 5. Configuring Plan Bonuses & Turnaround (`src/lib/site.config.ts`)
+Turnaround hours, onboarding limits, and optional bonus deliverables can be adjusted in `src/lib/site.config.ts`:
 ```ts
 export const site = {
-  brand: "Host Editify",
-  tagline: "You shoot, We deliver",
-  deliveryHours: 21,
+  deliveryHours: 24,
   maxClientsPerMonth: 5,
-  spotsLeftThisMonth: 2, // Set number to display counter; set to null to auto-hide bar
-  stats: {
-    adCtr: "2.5%",       // Verified stat from AI Buddies
-    costPerLeadUsd: null, // Null values automatically hide from UI
-    videosDelivered: null,
+  freeFirstVideoMaxSeconds: 40,
+  bonuses: {
+    hookBank: true,               // Always true (included free)
+    contentStyleIdeas: false,     // Set to true when client confirms inclusion
+    monthlyStrategyCall: false,   // Set to true when client confirms inclusion
   },
   // ...
 };
 ```
-
-### 2. Adding or Swapping Portfolio Videos
-1. Drop your raw 9:16 vertical MP4 video into the corresponding category folder:
-   - `public/videos/portfolio/real-estate/`
-   - `public/videos/portfolio/personal-brand/`
-   - `public/videos/portfolio/e-commerce/`
-   - `public/videos/portfolio/ai-avatar-ugc/`
-   - `public/videos/portfolio/ads/`
-2. Update the video entry in `src/components/sections/PortfolioSection.tsx`:
-   ```ts
-   {
-     id: "port-new",
-     title: "Your Video Title",
-     category: "Real Estate",
-     duration: "00:45",
-     posterUrl: "/posters/your-video.webp",
-     previewUrl: "/videos/portfolio/real-estate/your-video-preview.mp4",
-     fullVideoUrl: "/videos/portfolio/real-estate/your-video-full.mp4",
-     metric: "320K Views · 18 Inquiries",
-   }
-   ```
-
-### 3. Running the Video Processing Script
-To convert raw videos into web-optimized H.264 clips, hover previews (≤ 1MB), and WebP posters (≤ 60KB):
-```bash
-./scripts/process-videos.sh
-```
-
-### 4. Deploying to Vercel
-1. Push this repository to GitHub or GitLab.
-2. Import the project in [Vercel](https://vercel.com).
-3. In Project Settings → Environment Variables, add all keys from `.env.example`.
-4. Deploy!
-
----
-
-## 📋 Asset Status (`MISSING_ASSETS.md`)
-As required by truth-in-advertising guidelines for the Dubai market, all missing client media assets from the initial folder drop are tracked in [MISSING_ASSETS.md](file:///Users/harshchouksey/Desktop/host-editify/MISSING_ASSETS.md). When you receive client footage, drop files into `public/videos/` and `public/testimonials/` without touching component code.
