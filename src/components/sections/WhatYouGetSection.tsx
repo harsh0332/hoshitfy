@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 // Source: copy doc §6
 const deliverables = [
-  "15–30 short-form videos a month (Reels &\u00A0YouTube\u00A0Shorts)",
+  "15 or 25 short-form videos a month, based on your\u00A0plan",
   "Long-form YouTube edits (Authority plan)",
   "Dynamic captions, with English or Arabic subtitles",
   "Motion graphics and sound design",
@@ -52,6 +52,7 @@ function PlanCard({ plan }: { plan: Plan }) {
         )}
       </div>
       <p className="type-small text-muted mt-2">{plan.audience}</p>
+      {plan.lead && <p className="type-body mt-6 -mb-3 font-semibold text-white">{plan.lead}</p>}
 
       <ul className="mt-6 flex flex-1 flex-col gap-3">
         {plan.features.map((f) => (
@@ -74,10 +75,11 @@ export function WhatYouGetSection() {
     <Section id="plans-section">
       <SectionHeader title="Everything you need to post like a full-time creator" />
 
-      <div className="grid-gap mx-auto grid max-w-5xl grid-cols-1 items-stretch lg:grid-cols-2">
-        <div className="card flex h-full flex-col">
+      {/* Deliverables (2/3, two-column list) + Hook Bank (1/3): similar content height, so no empty gap */}
+      <div className="grid-gap mx-auto grid max-w-5xl grid-cols-1 items-stretch lg:grid-cols-3">
+        <div className="card h-full lg:col-span-2">
           <h3 className="type-h3 text-white">Core monthly deliverables</h3>
-          <ul className="mt-6 flex flex-col gap-3">
+          <ul className="mt-6 grid grid-cols-1 gap-x-8 gap-y-3 md:grid-cols-2">
             {deliverables.map((d) => (
               <CheckItem key={d}>{d}</CheckItem>
             ))}
@@ -85,28 +87,26 @@ export function WhatYouGetSection() {
         </div>
 
         {site.bonuses.hookBank && (
-          <div className="card flex h-full flex-col">
+          <div className="card flex h-full flex-col justify-center">
             <IconTile icon={Gift} />
             <h3 className="type-h3 mt-5 text-white">Bonus: The Hook Bank</h3>
             <p className="type-body text-muted mt-3">
               Before your first batch, we write a custom hook bank of opening lines for your niche,
               so every video starts strong. Included with every plan.
             </p>
-
-            <div className="mt-auto pt-8">
-              <div className="border-t border-white/[0.08] pt-6">
-                <h4 className="type-small font-semibold text-white">Formats we edit for</h4>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {formats.map((f) => (
-                    <li key={f} className="type-small rounded-full bg-white/[0.06] px-3 py-1.5 text-white/85">
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
           </div>
         )}
+      </div>
+
+      <div className="mt-8 flex flex-col items-center gap-3">
+        <h3 className="type-small font-semibold text-white">Formats we edit for</h3>
+        <ul className="flex flex-wrap justify-center gap-2">
+          {formats.map((f) => (
+            <li key={f} className="type-small rounded-full bg-white/[0.06] px-3 py-1.5 text-white/85">
+              {f}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="mt-20 md:mt-28">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { promises as fs } from "fs";
+import os from "os";
 import path from "path";
 import { isQualifiedBudget, leadSchema, type LeadFormData } from "@/lib/lead.schema";
 
@@ -12,11 +13,11 @@ function sha256(value: string): string {
 
 /**
  * Fallback when the webhook is missing or fails: print the lead to the server log (visible in
- * Vercel logs) and append it to a local NDJSON file (.leads/ locally, /tmp on Vercel).
+ * host logs) and append it to an NDJSON file (.leads/ locally, the temp dir in production).
  */
 async function logLeadLocally(lead: Record<string, unknown>, reason: string) {
   console.warn(`[lead] ${reason}. Lead logged here:`, JSON.stringify(lead));
-  const dir = process.env.VERCEL ? "/tmp" : path.join(process.cwd(), ".leads");
+  const dir = process.env.NODE_ENV === "production" ? os.tmpdir() : path.join(process.cwd(), ".leads");
   try {
     await fs.mkdir(dir, { recursive: true });
     await fs.appendFile(path.join(dir, "leads.ndjson"), JSON.stringify(lead) + "\n");

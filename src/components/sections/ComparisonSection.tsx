@@ -40,14 +40,14 @@ const rows: Row[] = [
     self: "Breaks when you're busy",
     freelancers: "Risk of ghosting",
     inHouse: "Stops for leave and sick days",
-    hostEditify: "Dedicated editor + backup team",
+    hostEditify: "One dedicated editor who learns your brand",
   },
   {
     feature: "Hiring and management",
     self: "None",
     freelancers: "Constant re-hiring",
     inHouse: "Fixed monthly salary + overhead",
-    hostEditify: "None",
+    hostEditify: "Zero hiring. We manage the team.",
   },
   {
     feature: "Try before you commit (first video free)",
@@ -163,11 +163,11 @@ export function ComparisonSection() {
       {/* Free-first-edit callout: separate card, 32px below the table */}
       <div className="mt-8 rounded-[20px] bg-[var(--card-bg)] px-6 py-10 text-center shadow-[0_0_60px_-20px_rgba(162,75,255,0.35)] md:px-12 md:py-14">
         <h3 className="type-h2 mx-auto max-w-3xl text-white">
-          Your first video is edited <span className="text-brand-gradient">FREE</span>. See the
-          quality before you pay anything.
+          Your first video is edited <span className="text-brand-gradient">FREE</span>.
         </h3>
         <p className="type-body text-muted mx-auto mt-4 max-w-xl">
-          Send us one raw clip. If you don&apos;t love the result, you walk away and pay nothing.
+          See the quality before you pay anything. Send us one raw clip. If you don&apos;t love the
+          result, you walk away and pay nothing.
         </p>
         <Button onClick={() => openAuditModal("comparison")} className="mt-8">
           Book My Free Content Audit
