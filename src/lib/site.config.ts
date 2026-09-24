@@ -18,7 +18,6 @@ export interface Plan {
 }
 
 export const site = {
-  brand: "Host Editify",
   tagline: "You shoot, We deliver",
   headline: "You film it. We edit it. It's ready in 24 hours.",
   deliveryHours: 24, // short-form, counted from footage + brief received
